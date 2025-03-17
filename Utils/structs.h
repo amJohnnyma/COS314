@@ -1,8 +1,13 @@
+#ifndef STRUCTS_H
+#define STRUCTS_H
+
 #include <iostream>
 
 struct coord
 {
     std::string name;
-    int x;
-    int y;
+    double x;
+    double y;
 };
+
+#endif

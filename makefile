@@ -1,6 +1,6 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -O2
+CXXFLAGS = -g -Wall -Wextra -std=c++17 -O2
 
 # Directories
 SRC_DIR = Assignments
