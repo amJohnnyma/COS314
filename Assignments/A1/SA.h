@@ -25,7 +25,7 @@ class SA
         unsigned int seed;
     public:
         SA(ProblemInstance pI, unsigned int seed);
-        std::vector<coord> solve(double initTemp, double finTemp, double coolRate, int maxIt);
+        std::vector<coord> solve(double initTemp,double finTemp, double coolRate, int maxIt);
         void swapCities(std::vector<coord>& route, size_t i, size_t j);
         double distanceR(const coord &a, const coord &b);
         double totalDistance(std::vector<coord> &route);

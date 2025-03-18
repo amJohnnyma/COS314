@@ -30,7 +30,7 @@ std::string SA::getPath(std::vector<coord> &route, ProblemInstance pi)
     auto routeBegin = route.begin(); 
     auto routeEnd = route.end();  
     for (auto i = route.begin(); i != routeEnd; ++i) {
-        bool found = false;
+     //   bool found = false;
         
         for (auto j : originalPath) {
             if (j.second.x == i->x && j.second.y == i->y) {
@@ -38,7 +38,7 @@ std::string SA::getPath(std::vector<coord> &route, ProblemInstance pi)
                 if (std::next(i) != routeEnd) {
                     path += "-> ";
                 }
-                found = true;
+             //   found = true;
 
                 if(i == routeBegin)
                 {
@@ -62,6 +62,8 @@ SA::SA(ProblemInstance pI, unsigned int seed)
     currentRoute = pI.randomSol(seed);
     bestRoute = currentRoute;
 
+
+
     Logger::info("Seed: " + std::to_string(seed));    
     for (const auto& city : currentRoute) {
         std::string coord = "(" + std::to_string(city.x) + "),(" + std::to_string(city.y) + ")";
@@ -78,6 +80,7 @@ std::vector<coord> SA::solve(double initTemp, double finTemp, double coolRate, i
     Logger::info("Max it without improvement: " + std::to_string(maxNoImpro));
 
     double temp = initTemp;
+    
     int noImproCount = 0;
 
     int numRuns = 0;
