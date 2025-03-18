@@ -178,3 +178,42 @@ int main() {
 
     return 0;
 }
+
+/*
+int main(int argc, char* argv[]) {
+  int seed = 0; // Default seed (optional, you can set it to something specific or use time)
+  int runs = 1; // Default number of runs
+  std::string algorithm = "SA"; // Default algorithm (Simulated Annealing)
+  
+  // Check if we have command-line arguments
+  for (int i = 1; i < argc; ++i) {
+      std::string arg = argv[i];
+      
+      if (arg == "--seed" && i + 1 < argc) {
+          seed = std::stoi(argv[++i]);  // Set the seed
+      } else if (arg == "--runs" && i + 1 < argc) {
+          runs = std::stoi(argv[++i]);  // Set the number of runs
+      } else if (arg == "--algorithm" && i + 1 < argc) {
+          algorithm = argv[++i];  // Set the algorithm type (SA or TS)
+      }
+  }
+  
+  // Seed the random number generator if seed is set
+  if (seed == 0) {
+      seed = static_cast<int>(time(nullptr)); // If no seed provided, use current time as seed
+  }
+  srand(seed);
+  
+  // Run the selected algorithm
+  if (algorithm == "SA") {
+      runSimulatedAnnealing(runs, seed);
+  } else if (algorithm == "TS") {
+      runTabuSearch(runs, seed);
+  } else {
+      std::cerr << "Invalid algorithm type. Use 'SA' for Simulated Annealing or 'TS' for Tabu Search." << std::endl;
+      return 1; // Exit with an error code
+  }
+
+  return 0;
+}
+*/
