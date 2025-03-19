@@ -12,6 +12,12 @@
 
 ## Installation Instructions
 
+#### 🔹 **Github Codespace**
+```sh
+make A1-linux
+./A1-linux
+```
+
 ### 1 Clone the Repository
 ```sh
 git clone https://github.com/amJohnnyma/COS314
@@ -24,17 +30,20 @@ cd COS314
 ```sh
 sudo apt update
 sudo apt install build-essential
+make A1-linux
 ```
 
 #### 🔹 **macOS**
 ```sh
 xcode-select --install  # Install command line tools
 brew install gcc        # Install GCC (if not installed)
+make A1-mac
 ```
 
 #### 🔹 **Windows**
 1. Download and install **MinGW-w64**: [MinGW-w64 Website](https://www.mingw-w64.org/)
 2. Add MinGW to your system `PATH` (or use **Git Bash**)
+make A1-windows
 
 ---
 
