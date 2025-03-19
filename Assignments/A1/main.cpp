@@ -50,16 +50,18 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> SAR
     
         Logger::info("Init temp: " + std::to_string(initTemp), "runData.txt");
         
-        for(int k =0; k < numRuns; k++)
-        {
-          unsigned int seed;
-          if(seedIn == 0)
+        unsigned int seed = 0;
+        if(seedIn == 0)
           {
-            seed = static_cast<unsigned int>(std::time(0)+k);
+            seed = static_cast<unsigned int>(std::time(0));
           }
           else{
             seed = seedIn;
           }
+        for(int k =0; k < numRuns; k++)
+        {
+         
+          seed = static_cast<unsigned int>(std::time(0)+k*10);
           runData = "SA -> File: " + filename + "\tseed: " + std::to_string(seed);         
           
           SA sa(pi, seed);
@@ -128,17 +130,18 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> TSR
         tabuLength = pi.getDimension() / 2;
         Logger::info("Tabu list length: " + std::to_string(tabuLength+1), "runData.txt");
 
-
-        for(int k =0; k < numRuns; k++)
-        {
-          unsigned int seed;
-          if(seedIn == 0)
+        unsigned int seed = 0;
+        if(seedIn == 0)
           {
-            seed = static_cast<unsigned int>(std::time(0)+k);
+            seed = static_cast<unsigned int>(std::time(0));
           }
           else{
             seed = seedIn;
           }
+        for(int k =0; k < numRuns; k++)
+        {
+         
+          seed = static_cast<unsigned int>(std::time(0)+k*10);
           runData = "TS -> File: " + filename + "\tseed: " + std::to_string(seed);  
           
           
@@ -210,13 +213,13 @@ int main(int argc, char* argv[]) {
           std::cin >> runs;
           Logger::info("Num runs: " + std::to_string(runs), "runData.txt");
         }
+        else{
+          runs = 1;
+        }
+      
    
     }
 
-    // Set seed if not provided
-    if (seed == 0) {
-        seed = static_cast<unsigned int>(std::time(0));
-    }
 
         auto saRuns = SARuns(runs, seed);
         auto tsRuns = TSRuns(runs, seed);

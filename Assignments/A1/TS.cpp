@@ -22,6 +22,7 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
     Logger::info("Max iterations: " + std::to_string(maxIt));
     Logger::info("Tabu list length: " + std::to_string(maxTabuListLength));
     int maxNoImpro = maxIt/ 5;
+    int noImproCount = 0;
     Logger::info("Max it without improvement: " + std::to_string(maxNoImpro));
 
    // double temp = initTemp;
@@ -34,7 +35,7 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
     std::uniform_real_distribution<> realDis(0.0, 1.0);
     std::vector<coord> s = currentSolution;
 
-    for(int it =0; it < maxIt && numRuns < maxNoImpro; it++)
+    for(int it =0; it < maxIt && noImproCount < maxNoImpro; it++)
     {
         tabuList.push_back(currentSolution);
         size_t i = dis(gen);
@@ -53,13 +54,18 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
             if(tabuList.size() > maxTabuListLength)
             {
                 tabuList.erase(tabuList.begin());
+                
             }
 
             tabuList.push_back(currentSolution);
 
             if(totalDistance(currentSolution) < totalDistance(s))
             {
+                noImproCount = 0;
                 s = currentSolution;
+            }
+            else{
+                noImproCount++;
             }
         }
 
@@ -67,7 +73,7 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
 
     }
 
-
+    Logger::info("Iterations used: " + std::to_string(numRuns), "runData.txt");
     return s;
 }
 
