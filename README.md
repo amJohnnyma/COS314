@@ -1,33 +1,94 @@
-# COS314
+# COS314 - TSP Algorithm Comparison
 
-Git repo: https://github.com/amJohnnyma/COS314
+## Git Repository
+[GitHub Repository](https://github.com/amJohnnyma/COS314)
 
-# README for TSP Algorithm Comparison
+---
 
-## Installation Instructions:
-1. Clone the repository: `git clone https://github.com/amJohnnyma/COS314`
-2. Navigate to the project directory: `cd <your-project-directory>`
-3. Install dependencies: 
-	3.1. Linux: 
+## Reports
+- **A1**
+
+---
+
+## Installation Instructions
+
+### 1 Clone the Repository
+```sh
+git clone https://github.com/amJohnnyma/COS314
+cd COS314
+```
+
+### 2 Install Dependencies
+
+#### 🔹 **Linux (Ubuntu/Debian-based, or WSL)**
+```sh
 sudo apt update
-		Sudo apt install build-essential
-	3.2. MacOS:
-		xcode-select --install  # Install command line tools
-brew install gcc    	# Install GCC (if not installed)
-3.3. Windows:
-	Install MinGW-w64 https://www.mingw-w64.org/
-	Add minGW to your system PATH (or use Git Bash)
+sudo apt install build-essential
+```
 
-4. Run the program:
-	./A1-linux
+#### 🔹 **macOS**
+```sh
+xcode-select --install  # Install command line tools
+brew install gcc        # Install GCC (if not installed)
+```
+
+#### 🔹 **Windows**
+1. Download and install **MinGW-w64**: [MinGW-w64 Website](https://www.mingw-w64.org/)
+2. Add MinGW to your system `PATH` (or use **Git Bash**)
+
+---
+
+## ▶ Running the Program
+
+### **On Linux**
+```sh
+./A1-linux
+```
+
+### **On macOS**
+```sh
 ./A1-mac
-./A1-windows
-Or run the respective executable (for a random seed and 10 runs)
+```
 
-## Usage:
-- If running from terminal:
-Navigate to the project directory
-Run ./A1-<respective OS>
-Enter seed (If blank random seed, if a seed is entered then only 1 run will take place)
-Enter the amount of runs
-Open Utils/logs/runData.txt to find results
+### **On Windows**
+```sh
+A1-windows.exe
+```
+
+Alternatively, run the respective executable file directly.
+
+**By default**, the program runs with a **random seed** and **10 iterations**.
+
+---
+
+## ⚙ Usage Instructions
+
+### **Running from Terminal**
+1. **Navigate to the project directory**
+2. Run the appropriate executable for your OS:
+   ```sh
+   ./A1-linux  # For Linux
+   ./A1-mac    # For macOS
+   A1-windows  # For Windows
+   ```
+3. **Enter Seed Value:**
+   - Leave **blank** for a **random seed**.
+   - Enter a **specific seed** to run with a fixed value (**1 run only**).
+4. **Enter the number of runs** (if a random seed was chosen).
+5. **Check the results** in:
+   ```sh
+   Utils/logs/runData.txt
+   ```
+
+---
+
+## Output Location
+- The results are stored in: `Utils/logs/runData.txt`
+- Open the file to analyze the algorithm's performance.
+
+---
+
+### **Now You're Ready to Run the TSP Algorithm! **
+
+For any issues, feel free to check the repository or raise an issue. 
+
