@@ -5,7 +5,7 @@
 #include "TS.h"
 #include <iostream>
 
-std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> SARuns(int numRuns)
+std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> SARuns(int numRuns, unsigned int seedIn)
 {
   //"
     std::vector<std::string> files = {"8.txt", "12.txt","15.txt", "20.txt", "25.txt"};
@@ -52,7 +52,14 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> SAR
         
         for(int k =0; k < numRuns; k++)
         {
-          unsigned int seed = static_cast<unsigned int>(std::time(0)+k);
+          unsigned int seed;
+          if(seedIn == 0)
+          {
+            seed = static_cast<unsigned int>(std::time(0)+k);
+          }
+          else{
+            seed = seedIn;
+          }
           runData = "SA -> File: " + filename + "\tseed: " + std::to_string(seed);         
           
           SA sa(pi, seed);
@@ -94,7 +101,7 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> SAR
     
 }
 
-std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> TSRuns(int numRuns)
+std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> TSRuns(int numRuns, unsigned int seedIn)
 {
   //"
     std::vector<std::string> files = {"8.txt", "12.txt","15.txt", "20.txt", "25.txt"};
@@ -124,7 +131,14 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> TSR
 
         for(int k =0; k < numRuns; k++)
         {
-          unsigned int seed = static_cast<unsigned int>(std::time(0)+k);
+          unsigned int seed;
+          if(seedIn == 0)
+          {
+            seed = static_cast<unsigned int>(std::time(0)+k);
+          }
+          else{
+            seed = seedIn;
+          }
           runData = "TS -> File: " + filename + "\tseed: " + std::to_string(seed);  
           
           
@@ -166,54 +180,47 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> TSR
     
 }
 
-int main() {
-  Logger::info("\n\nStarting program");
-  
-  std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> saRuns = SARuns(100);
-  std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> tsRuns = TSRuns(100);
 
+int main(int argc, char* argv[]) {
+    Logger::info("\n\nStarting program");
+    Logger::info("Starting main", "runData.txt");
 
-  
+    unsigned int seed = 0; // Default seed
+    int runs = 10; // Default number of runs
 
+    if (argc > 1) {  // Command-line mode
+        for (int i = 1; i < argc; i++) {
+            std::string arg = argv[i];
+            if (arg == "--seed" && i + 1 < argc) {
+                seed = std::stoi(argv[++i]);
+                Logger::info("Seed: " + std::to_string(seed), "runData.txt");
+            } else if (arg == "--runs" && i + 1 < argc) {
+                runs = std::stoi(argv[++i]);
+                Logger::info("Num runs: " + std::to_string(runs), "runData.txt");
+            }
+        }
+    } else {  // Interactive Mode
+        std::cout << "Enter seed (0 for random, any seed will be 1 run): ";
+        std::cin >> seed;
+        Logger::info("Seed: " + std::to_string(seed), "runData.txt");
+
+        if(seed == 0)
+        {
+          std::cout << "Enter number of runs: ";
+          std::cin >> runs;
+          Logger::info("Num runs: " + std::to_string(runs), "runData.txt");
+        }
+   
+    }
+
+    // Set seed if not provided
+    if (seed == 0) {
+        seed = static_cast<unsigned int>(std::time(0));
+    }
+
+        auto saRuns = SARuns(runs, seed);
+        auto tsRuns = TSRuns(runs, seed);
 
     return 0;
 }
 
-/*
-int main(int argc, char* argv[]) {
-  int seed = 0; // Default seed (optional, you can set it to something specific or use time)
-  int runs = 1; // Default number of runs
-  std::string algorithm = "SA"; // Default algorithm (Simulated Annealing)
-  
-  // Check if we have command-line arguments
-  for (int i = 1; i < argc; ++i) {
-      std::string arg = argv[i];
-      
-      if (arg == "--seed" && i + 1 < argc) {
-          seed = std::stoi(argv[++i]);  // Set the seed
-      } else if (arg == "--runs" && i + 1 < argc) {
-          runs = std::stoi(argv[++i]);  // Set the number of runs
-      } else if (arg == "--algorithm" && i + 1 < argc) {
-          algorithm = argv[++i];  // Set the algorithm type (SA or TS)
-      }
-  }
-  
-  // Seed the random number generator if seed is set
-  if (seed == 0) {
-      seed = static_cast<int>(time(nullptr)); // If no seed provided, use current time as seed
-  }
-  srand(seed);
-  
-  // Run the selected algorithm
-  if (algorithm == "SA") {
-      runSimulatedAnnealing(runs, seed);
-  } else if (algorithm == "TS") {
-      runTabuSearch(runs, seed);
-  } else {
-      std::cerr << "Invalid algorithm type. Use 'SA' for Simulated Annealing or 'TS' for Tabu Search." << std::endl;
-      return 1; // Exit with an error code
-  }
-
-  return 0;
-}
-*/
