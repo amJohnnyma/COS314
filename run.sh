@@ -3,4 +3,4 @@
 
 
 #!/bin/bash
-gnome-terminal -- bash -c "./A1; exec bash"
+gnome-terminal -- bash -c "./A1-linux; exec bash"

@@ -1,2 +1,2 @@
 @echo off
-start cmd /k A1.exe
+start cmd /k A1-windows
