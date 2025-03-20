@@ -95,7 +95,8 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
       }
 
     }
- //   Logger::info("Iterations used: " + std::to_string(numRuns), "runData.txt");
+    Logger::info("TS Search result for: " + std::to_string(currentSolution.size()), "iterationData.txt");
+    Logger::info("Iterations used: " + std::to_string(numRuns), "iterationData.txt");
     return currentSolution;
 }
 

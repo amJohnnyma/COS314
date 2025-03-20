@@ -137,7 +137,8 @@ std::vector<coord> SA::solve(double initTemp, double finTemp, double coolRate, i
 
     }
 
-    Logger::info("Iterations used: " + std::to_string(numRuns));
+    Logger::info("SA Search result for: " + std::to_string(bestRoute.size()), "iterationData.txt");
+    Logger::info("Iterations used: " + std::to_string(numRuns), "iterationData.txt");
   //  Logger::info("Iterations used: " + std::to_string(numRuns), "runData.txt");
     return bestRoute;
 }
