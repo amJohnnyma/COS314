@@ -76,7 +76,7 @@ SA::SA(ProblemInstance pI, unsigned int seed)
 std::vector<coord> SA::solve(double initTemp, double finTemp, double coolRate, int maxIt)
 {
     double bestDistance = totalDistance(bestRoute);
-    int maxNoImpro = maxIt/ 20;
+    int maxNoImpro = maxIt * 0.2;
     Logger::info("Max it without improvement: " + std::to_string(maxNoImpro));
 
     double temp = initTemp;
@@ -93,13 +93,12 @@ std::vector<coord> SA::solve(double initTemp, double finTemp, double coolRate, i
     //seed gen
     for(int it = 0; it < maxIt && temp > finTemp && noImproCount < maxNoImpro; it++)
     {
-        numRuns++;
+        
         size_t i = dis(gen);
-        size_t j = dis(gen);
-
-        while(i==0){i = dis(gen);}
-        while(j==0){j = dis(gen);}
-        while(i==j) {j = dis(gen); while(j==0){j=dis(gen);}}
+        size_t j;
+        do{
+            j = dis(gen);
+        } while(i==j);
 
         
         double oldDistance = totalDistance(currentRoute);
@@ -134,10 +133,12 @@ std::vector<coord> SA::solve(double initTemp, double finTemp, double coolRate, i
         temp = initTemp / std::log(it+1);
       //  temp*=coolRate;
 
+      numRuns++;
+
     }
 
     Logger::info("Iterations used: " + std::to_string(numRuns));
-    Logger::info("Iterations used: " + std::to_string(numRuns), "runData.txt");
+  //  Logger::info("Iterations used: " + std::to_string(numRuns), "runData.txt");
     return bestRoute;
 }
 
