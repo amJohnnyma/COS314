@@ -87,7 +87,7 @@ std::vector<coord> SA::solve(double initTemp, double finTemp, double coolRate, i
 
     std::mt19937 gen(seed);
 
-    std::uniform_int_distribution<> dis(0, currentRoute.size() - 1);
+    std::uniform_int_distribution<> dis(1, currentRoute.size() - 1);
     std::uniform_real_distribution<> realDis(0.0, 1.0);
 
     //seed gen

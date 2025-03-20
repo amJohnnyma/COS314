@@ -12,6 +12,7 @@
 #include <random>
 #include <ctime>
 #include <algorithm>
+#include <unordered_set>
 
 class ProblemInstance;
 
@@ -20,8 +21,8 @@ class TS
     private:
         std::vector<coord> currentSolution;
         int maxTabuListLength;
-      //  std::unordered_set<std::vector<coord>, VectorHash> tabuSet;
-        std::vector<std::vector<coord>> tabuList;
+        std::unordered_set<std::vector<coord>, VectorHash> tabuList;
+      //  std::vector<std::vector<coord>> tabuList;
         unsigned int seed;
     public:
         TS(ProblemInstance pI, unsigned int seed);

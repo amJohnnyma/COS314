@@ -17,10 +17,11 @@ TS::TS(ProblemInstance pI, unsigned int seed)
 std::vector<coord> TS::solve(int maxIt, double maxTL)
 {
     maxTabuListLength = std::round(maxTL+1);
+    int minTabuListLength = maxTabuListLength;
 
     double bestDistance = totalDistance(currentSolution);
     Logger::info("Max iterations: " + std::to_string(maxIt));
-    Logger::info("Tabu list length: " + std::to_string(maxTabuListLength));
+    Logger::info("Initial Tabu list length: " + std::to_string(maxTabuListLength));
     int maxNoImpro = maxIt * 0.2;
     int noImproCount = 0;
     Logger::info("Max it without improvement: " + std::to_string(maxNoImpro));
@@ -33,45 +34,56 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
     std::uniform_real_distribution<> realDis(0.0, 1.0);
     std::vector<coord> s = currentSolution;
 
-    for(int it =0; it < maxIt; it++)
+    for(int it =0; it < maxIt && maxTabuListLength < minTabuListLength * 1.5; it++)
     {        
         size_t i = dis(gen);
         size_t j;
         do{
             j = dis(gen);
-        } while(i==j);
+        } while(i==j);        
         
-
-       
         //random neighbour s'
         swapCities(s, i,j);
-        int count = std::count(tabuList.begin(), tabuList.end(), s);
-        if(count <= 0)
-        {          
 
+        if(tabuList.find(s) == tabuList.end())
+        {
 
             if(totalDistance(s) < totalDistance(currentSolution))
             {
+
                 noImproCount = 0;
                 bestDistance = totalDistance(s);
                 currentSolution = s;
-                maxTabuListLength--;
+                if(maxTabuListLength > minTabuListLength)
+                {
+                    maxTabuListLength--;
+                }
+                
+                
             }
             else{
+
                 noImproCount++;
             }
 
+
             while(tabuList.size() >= maxTabuListLength)
-            {                
+            {         
+       
                 tabuList.erase(tabuList.begin());                
             }
-            tabuList.push_back(s);
 
-        }
+            tabuList.insert(s);
+
+
+        }  
         else{
+
             //swap back since it is in the list
             swapCities(s, i,j);
+
         }
+
 
         
       numRuns++;
@@ -83,7 +95,6 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
       }
 
     }
-
  //   Logger::info("Iterations used: " + std::to_string(numRuns), "runData.txt");
     return currentSolution;
 }

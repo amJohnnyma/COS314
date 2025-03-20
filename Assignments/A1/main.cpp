@@ -14,6 +14,9 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> SAR
     double coolRate = 0.95;
     int maxIt = 5000;
 
+    Logger::info("Seed in: "+ std::to_string(seedIn), "runData.txt");
+
+
     std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> allBestRunsMap;
     std::map<std::string, unsigned int> bestRunKey;
     std::map<double, std::string> bestRunMap;
@@ -50,18 +53,17 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> SAR
     
         Logger::info("Init temp: " + std::to_string(initTemp), "runData.txt");
         
-        unsigned int seed = 0;
-        if(seedIn == 0)
-          {
-            seed = static_cast<unsigned int>(std::time(0));
-          }
-          else{
-            seed = seedIn;
-          }
+        unsigned int seed = 0;       
         for(int k =0; k < numRuns; k++)
         {
-         
+         if(seedIn != 0)
+         {
+          seed = seedIn;
+         }
+         else{
           seed = static_cast<unsigned int>(std::time(0)+k*10);
+         }
+          
           runData = "SA -> File: " + filename + "\tseed: " + std::to_string(seed);         
           
           SA sa(pi, seed);
@@ -86,7 +88,7 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> SAR
         {
           allRunString += std::to_string(r) + ", ";
         }   
-        Logger::info(allRunString, "runData.txt");
+      //  Logger::info(allRunString, "runData.txt");
         Logger::info(runData+ "\n", "runData.txt");
         bestRunMap[bestCost] = bestRun;  
         
@@ -109,6 +111,7 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> TSR
     std::vector<std::string> files = {"8.txt", "12.txt","15.txt", "20.txt", "25.txt"};
     int maxIt = 5000;
     double tabuLength = 0;
+    Logger::info("Seed in: "+ std::to_string(seedIn), "runData.txt");
 
 
     std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> allBestRunsMap;
@@ -128,20 +131,19 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> TSR
         std::string runData = "";
         ProblemInstance pi(filename);
         tabuLength = pi.getDimension() / 2;
-        Logger::info("Tabu list length: " + std::to_string(tabuLength+1), "runData.txt");
+        Logger::info("Initial Tabu list length: " + std::to_string(tabuLength+1), "runData.txt");
 
-        unsigned int seed = 0;
-        if(seedIn == 0)
-          {
-            seed = static_cast<unsigned int>(std::time(0));
-          }
-          else{
-            seed = seedIn;
-          }
+        unsigned int seed = 0;       
         for(int k =0; k < numRuns; k++)
         {
+          if(seedIn != 0)
+          {
+           seed = seedIn;
+          }
+          else{
+           seed = static_cast<unsigned int>(std::time(0)+k*10);
+          }
          
-          seed = static_cast<unsigned int>(std::time(0)+k*10);
           runData = "TS -> File: " + filename + "\tseed: " + std::to_string(seed);  
           
           
@@ -168,7 +170,7 @@ std::map<std::map<std::string, unsigned int>, std::map<double, std::string>> TSR
         {
           allRunString += std::to_string(r) + ", ";
         }   
-        Logger::info(allRunString, "runData.txt");
+     //   Logger::info(allRunString, "runData.txt");
         Logger::info(runData + "\n", "runData.txt");
 
 
