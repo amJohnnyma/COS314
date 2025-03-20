@@ -18,7 +18,9 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
 {
     maxTabuListLength = std::round(maxTL+1);
     int minTabuListLength = maxTabuListLength;
-
+    int numNodes = currentSolution.size();
+    int repeat = 1;    
+    double repeatMax = ceil(2+(numNodes/3));
     double bestDistance = totalDistance(currentSolution);
     Logger::info("Max iterations: " + std::to_string(maxIt));
     Logger::info("Initial Tabu list length: " + std::to_string(maxTabuListLength));
@@ -34,7 +36,7 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
     std::uniform_real_distribution<> realDis(0.0, 1.0);
     std::vector<coord> s = currentSolution;
 
-    for(int it =0; it < maxIt && maxTabuListLength < minTabuListLength * 1.5; it++)
+    for(int it =0; it < maxIt && repeat < 2; it++)
     {        
         size_t i = dis(gen);
         size_t j;
@@ -52,6 +54,7 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
             {
 
                 noImproCount = 0;
+                repeat = 1;
                 bestDistance = totalDistance(s);
                 currentSolution = s;
                 if(maxTabuListLength > minTabuListLength)
@@ -81,6 +84,7 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
 
             //swap back since it is in the list
             swapCities(s, i,j);
+            noImproCount++;
 
         }
 
@@ -88,10 +92,11 @@ std::vector<coord> TS::solve(int maxIt, double maxTL)
         
       numRuns++;
 
-      if(noImproCount >= maxNoImpro)
+ 
+      if(noImproCount/repeat >= maxNoImpro)
       {
         maxTabuListLength++;
-        noImproCount = 0;
+        repeat++;
       }
 
     }
