@@ -12,7 +12,7 @@
 
 ## Installation Instructions
 
-#### 🔹 **Github Codespace**
+#### 🔹 **Github Codespace (Recommended)**
 ```sh
 make A1-linux
 ./A1-linux
