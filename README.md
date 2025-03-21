@@ -6,7 +6,7 @@
 ---
 
 ## Reports
-- [A1](https://github.com/amJohnnyma/COS314/blob/main/COS314A1D1.pdf) (Please Download for best experience)
+- [A1](https://github.com/amJohnnyma/COS314/blob/main/COS314A1.pdf) (Please Download for best experience)
 
 ---
 
