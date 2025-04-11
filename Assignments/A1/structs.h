@@ -33,4 +33,5 @@ struct VectorHash {
         return hashVal;
     }
 };
+
 #endif

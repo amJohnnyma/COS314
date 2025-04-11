@@ -16,11 +16,11 @@
 class ProblemInstance
 {
     private:
-        int numNodes; 
-        int numVehicles;
-        std::string tMaxString;
-        double tmax;
-        int score;
+        std::string name;
+        std::string type;
+        std::string dimension;
+        int dimenInt;
+        std::string edge_weight_type;
         std::map<std::string, coord> node_coord_section;
         std::map<std::string, std::vector<std::pair<std::string, double>>> adjList;
 
@@ -28,15 +28,16 @@ class ProblemInstance
         ProblemInstance(std::string filename);
         ~ProblemInstance();
 
-        void addCoord(double x, double y, int score);
+        void addCoord(std::string id, double x, double y);
         double distance(const coord& a, const coord& b);
         void addEdge(std::string u, std::string v);
 
         void printGraph();
 
-        int getNumNodes();
-        int getNumVehicles();
-        double getTmax();
+        std::string getName();
+        std::string getType();
+        std::string getEdgeWeightType();
+        int getDimension();
         std::vector<coord> getNodeCoordSection();
 
         std::vector<coord> randomSol(unsigned int seed);

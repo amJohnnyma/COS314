@@ -6,7 +6,7 @@ ProblemInstance::ProblemInstance(std::string filename)
 {
     Logger::info("Constructing problem instance fn: " + filename);
 
-    std::fstream file("Assignments/A2/Data_TOP/" + filename);
+    std::fstream file("Assignments/A1/Data/" + filename);
 
     if(!file.is_open())
     {
@@ -28,41 +28,59 @@ ProblemInstance::ProblemInstance(std::string filename)
 
       //  std::cout << kw << std::endl;
 
-        if(kw == "n")
+        if(kw == "NAME:")
         {
-            iss >> numNodes;
-            break;
+            iss >> name;
         }   
-        if(kw == "m")
+        if(kw == "TYPE:")
         {
-            iss >> numVehicles;
-            break;
+            iss >> type;
 
         }  
-        if(kw == "tmax")
+        if(kw == "DIMENSION:")
         {
-            iss >> tMaxString;
+            iss >> dimension;
 
             std::ostringstream d;
-            d << tMaxString;
-            std::istringstream(d.str()) >> tmax;
-            break;
+            d << dimension;
+            std::istringstream(d.str()) >> dimenInt;
 
         }  
+        if(kw == "EDGE_WEIGHT_TYPE:")
+        {
+            iss >> edge_weight_type;
 
-        double x, y;
-        int score;        
-        iss >> x >> y >> score;
-
-        // std::cout << id << ": " << x << ", " << y << ", score = " << score << std::endl;
-            addCoord(x, y, score); 
-        
+        }  
+        if(kw == "NODE_COORD_SECTION")
+        {
+            readingCoords = true;
+            continue;
+        }  
+        if(kw == "EOF:")
+        {
+            readingCoords = false;
+            continue;
+        } 
+        if(readingCoords)
+        {
+            std::string id;
+            double x, y;
+            id = (kw);
+            iss >> x >> y;
+            if(id != "EOF")
+            {
+          //      std::cout << id << ": " << x << ", " << y << std::endl;
+            addCoord(id, x, y);
+            }
+            
+        }
        
     }
 
+    Logger::info("Dimension: " + dimension);
     Logger::info("Adding edges");
-    for (int i = 1; i <= numNodes; i++) {
-        for (int j = i + 1; j <= numNodes; j++) {
+    for (int i = 1; i <= dimenInt; i++) {
+        for (int j = i + 1; j <= dimenInt; j++) {
             std::ostringstream is;
             std::ostringstream js;
             is << i;
@@ -81,14 +99,14 @@ ProblemInstance::~ProblemInstance()
    
 }
 
-void ProblemInstance::addCoord(double x, double y, int score)
+void ProblemInstance::addCoord(std::string id, double x, double y)
 {
     coord n;
- //   n.name = id;
+    n.name = id;
     n.x = x;
     n.y = y;
- //   node_coord_section[id] = n;
- //   Logger::info("Added cord " + id);
+    node_coord_section[id] = n;
+    Logger::info("Added cord " + id);
 }
 
 double ProblemInstance::distance(const coord &a, const coord &b)
@@ -130,21 +148,25 @@ void ProblemInstance::printGraph()
     
 }
 
-int ProblemInstance::getNumNodes()
+std::string ProblemInstance::getName()
 {
-    return numNodes;
+    return name;
 }
 
-int ProblemInstance::getNumVehicles()
+std::string ProblemInstance::getType()
 {
-    return numVehicles;
+    return type;
 }
 
-double ProblemInstance::getTmax(){
-    return tmax;
+std::string ProblemInstance::getEdgeWeightType()
+{
+    return edge_weight_type;
 }
 
-
+int ProblemInstance::getDimension()
+{
+    return dimenInt;
+}
 
 std::vector<coord> ProblemInstance::getNodeCoordSection()
 {
