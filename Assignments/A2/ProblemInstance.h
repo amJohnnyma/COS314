@@ -12,6 +12,9 @@
 #include <map>
 #include "structs.h"
 #include "../../Utils/Logger.h"
+#include <regex>
+#include <set>
+
 
 class ProblemInstance
 {
@@ -21,8 +24,11 @@ class ProblemInstance
         std::string tMaxString;
         double tmax;
         int score;
+        coord depot;
         std::map<std::string, coord> node_coord_section;
         std::map<std::string, std::vector<std::pair<std::string, double>>> adjList;
+        std::string debugfile = "TOP";
+        int id = 0;
 
     public:
         ProblemInstance(std::string filename);
@@ -33,6 +39,7 @@ class ProblemInstance
         void addEdge(std::string u, std::string v);
 
         void printGraph();
+        std::string printGraphAsTable();
 
         int getNumNodes();
         int getNumVehicles();

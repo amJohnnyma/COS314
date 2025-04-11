@@ -7,13 +7,25 @@
 
 struct coord
 {
-    std::string name;
+    int score;
     double x;
     double y;
 
+    coord() : score(0), x(0.0), y(0.0) {}
+
+    coord(int score, double x, double y)
+        : score(score), x(x), y(y) {}
+
     bool operator==(const coord& other) const {
-        return x == other.x && y == other.y;
+        return x == other.x && y == other.y && score == other.score;
     }
+
+    std::string to_string()
+    {
+        return "Score: " + std::to_string(score) + '\t' + std::to_string(x) + ", " + std::to_string(y);
+    }
+
+
 };
 
 // Hash function for a single coord
