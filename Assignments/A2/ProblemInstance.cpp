@@ -376,6 +376,8 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
     window.clear();
 
     // Transform and draw edges
+    
+
     std::vector<sf::Vertex> transformedEdges;
     for (size_t i = 0; i < edges.size(); ++i) {
         auto pos = edges[i].position;
@@ -391,27 +393,39 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
     {
         
         window.draw(&transformedEdges[0], transformedEdges.size(), sf::Lines);
-        window.display();
-     //   sf::sleep(sf::seconds(1));
-        
+       // window.display();
+    }
+    
+
+       
+
+
        /*
-              for (size_t i = 0; i < transformedEdges.size(); i += 2)
-    {
-       // window.clear();
+       
+       std::vector<sf::RectangleShape> transformedEdges; // Store the rectangle shapes representing edges
 
-        // Draw the current edge
-        window.draw(&transformedEdges[i], 2, sf::Lines);
+       for (size_t i = 0; i < edges.size(); ++i) {
+           auto pos = edges[i].position; // Get the start position of the edge
+       
+           // Get the end position (assuming you have access to the second point of each edge)
+           sf::Vector2f endPos = edges[i + 1].position; // If edges are pairs, adjust accordingly
+       
+           // Calculate the direction and distance between the two points
+           sf::Vector2f direction = endPos - pos;
+           float length = std::sqrt(direction.x * direction.x + direction.y * direction.y); 
+           float angle = std::atan2(direction.y, direction.x) * 180 / 3.14159265f; 
+       
+           sf::RectangleShape line(sf::Vector2f(length,pheremones)); 
+           line.setPosition(pos); 
+       
+           line.setRotation(angle);
+       
+           line.setFillColor(edges[i].color);
+       
+           transformedEdges.push_back(line);
+       }
 
-     //   window.display();
-
-     //  sf::sleep(sf::seconds(0.05)); 
-    }
-       */
-
-
-    }
-
-
+*/
     for (const auto& node : nodes) {
         sf::CircleShape transformed = node;
         auto pos = node.getPosition();
@@ -437,7 +451,7 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
       //  Logger::info("Drawing:(" + std::to_string((double)node.getPosition().x) + "," + std::to_string((double)node.getPosition().y) + ")", "drawlog.txt");
     }
 
-
+    
 
     window.display();
 }
