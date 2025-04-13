@@ -1,14 +1,14 @@
 # Compiler and flags
 CXX = g++
 CXXFLAGS = -g -Wall -Wextra -std=c++17 -O2
-LDFLAGS =
+LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
 
 # Detect OS
 OS := $(shell uname -s)
 
 ifeq ($(OS), Linux)
     EXT = linux
-    CXXFLAGS += -static
+    #CXXFLAGS += -static
 else ifeq ($(OS), Darwin)
     EXT = mac
     CXXFLAGS += -stdlib=libc++

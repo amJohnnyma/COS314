@@ -15,6 +15,8 @@
 #include <regex>
 #include <set>
 
+#include <SFML/Graphics.hpp>
+
 
 class ProblemInstance
 {
@@ -28,7 +30,14 @@ class ProblemInstance
         std::map<std::string, coord> node_coord_section;
         std::map<std::string, std::vector<std::pair<std::string, double>>> adjList;
         std::string debugfile = "TOP";
-        int id = 0;
+        int id = 1;
+        bool changes = true;
+        double pheremones = 0.1;
+
+
+        void update(std::vector<sf::CircleShape>& nCircles, std::vector<sf::Vertex>& edges);
+        void handleEvents(sf::RenderWindow &window);
+        void render(sf::RenderWindow &window, const std::vector<sf::CircleShape> &nodes, const std::vector<sf::Vertex> &edges);
 
     public:
         ProblemInstance(std::string filename);
@@ -44,10 +53,11 @@ class ProblemInstance
         int getNumNodes();
         int getNumVehicles();
         double getTmax();
-        std::vector<coord> getNodeCoordSection();
+        void solveProblem();
 
         std::vector<coord> randomSol(unsigned int seed);
 
+        std::vector<std::pair<std::string ,coord>> getNodeCoordSection();
         std::map<std::string, std::vector<std::pair<std::string, double>>> getAdjList();
 
         std::map<std::string, coord> getFullCoordInfo();

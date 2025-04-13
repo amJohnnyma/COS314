@@ -20,7 +20,7 @@ ProblemInstance::ProblemInstance(std::string filename)
 
     while(std::getline(file, line))
     {
-      //  Logger::info(line, debugfile);
+        Logger::info(line, debugfile);
         
         // Replace tabs with spaces to ensure proper parsing
         std::replace(line.begin(), line.end(), '\t', ' ');  // Convert all tabs to spaces
@@ -68,7 +68,8 @@ ProblemInstance::ProblemInstance(std::string filename)
             double y = numbers[1];
             int score = numbers[2];
           //  Logger::info(coord(score,x,y).to_string(),debugfile);
-            addCoord(x, y, score); 
+          //  if( x != 0 && y != 0)
+                addCoord(x, y, score); 
 
             if(first)
             {
@@ -94,7 +95,8 @@ ProblemInstance::ProblemInstance(std::string filename)
             std::string iStr = is.str();
             std::string jStr = js.str();
            // Logger::info(iStr + ": " + jStr);
-            addEdge(iStr, jStr);
+          // if (iStr != "0" && jStr != "0")
+                addEdge(iStr, jStr);
         }
     }
 
@@ -107,13 +109,20 @@ ProblemInstance::~ProblemInstance()
 
 void ProblemInstance::addCoord(double x, double y, int score)
 {
+   // if(x == 0 || y == 0)
+    {
+   //     return;
+    }
     coord n;
     n.score = score;
     n.x = x;
     n.y = y;
+
     node_coord_section[std::to_string(id)] = n;
+    
+    Logger::info("Added cord\t" + n.to_string() + "\tID: " + std::to_string(id), debugfile);
+    
     id++;
-    Logger::info("Added cord\t" + n.to_string(), debugfile);
 }
 
 double ProblemInstance::distance(const coord &a, const coord &b)
@@ -227,15 +236,226 @@ double ProblemInstance::getTmax(){
     return tmax;
 }
 
+void ProblemInstance::solveProblem()
+{
+    sf::RenderWindow window(sf::VideoMode(1200, 900), "ACO Visualizer");
+
+  //  std::map<std::string, coord> node_coord_section;
+  //  std::map<std::string, std::vector<std::pair<std::string, double>>> adjList;
+
+    std::vector<sf::CircleShape> nCircles;
+    std::vector<sf::Vertex> edges;
+ 
 
 
-std::vector<coord> ProblemInstance::getNodeCoordSection()
+    while (window.isOpen()) {
+        handleEvents(window); 
+        update(nCircles, edges);        
+        if(changes)
+        {
+            render(window, nCircles, edges); 
+        }           
+        
+    }
+}
+
+void ProblemInstance::handleEvents(sf::RenderWindow& window)
+{    
+    sf::Event event;
+    while (window.pollEvent(event))
+        if (event.type == sf::Event::Closed)
+        {
+            window.close();
+        }
+
+
+}
+
+void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles, std::vector<sf::Vertex>& edges)
+{
+    std::vector<std::pair<std::string, coord>> nodes = getNodeCoordSection();    
+    //rather retrieve "best solution" and edit that instead of nodes
+    
+
+
+    std::map<std::string, coord> nodeCoordMap;
+    std::set<std::pair<std::string, std::string>> drawn;
+
+
+       
+    for(const auto& n : nodes)
+    {
+       // Logger::info("Node: " + n.first, "solveProblem.txt");
+        sf::CircleShape ns(std::max(1, n.second.score/10));
+        ns.setFillColor(sf::Color::Green);
+        
+        ns.setPosition(n.second.x, n.second.y);
+        nCircles.push_back(ns);       
+
+    }
+
+
+    for(const auto& i : nodes)
+    {
+        coord c = i.second;
+      //  Logger::info("Map Node: " + i.first + " = " + c.to_string(), "solveProblem.txt");
+
+        nodeCoordMap[i.first] = i.second;
+    }
+
+
+    for(const auto & [id ,otherNode] : adjList)
+    {
+        const std::string& fID = id;
+        const coord & nodePos = nodeCoordMap[fID];
+        //get matching ID in node_coord_section
+        for(const auto & neighbour : otherNode)
+        {
+
+
+            auto it = nodeCoordMap.find(neighbour.first);
+            if(it != nodeCoordMap.end())
+            {
+                auto pairKey = std::minmax(fID, neighbour.first);
+                if (drawn.count(pairKey)) continue;
+                drawn.insert(pairKey);
+
+                sf::Vertex start = sf::Vertex(sf::Vector2f(nodePos.x, nodePos.y), sf::Color::Red);  //start
+                sf::Vertex end = sf::Vertex(sf::Vector2f(nodeCoordMap[neighbour.first].x, nodeCoordMap[neighbour.first].y), sf::Color::Red); //end
+                
+                edges.push_back(start);
+                edges.push_back(end);
+            }
+            else{
+                std::cout << neighbour.first << std::endl;
+                std::cout << "COORD NOT FOUND" << std::endl;
+            }
+
+        }
+
+    }
+}
+
+void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::CircleShape>& nodes, const std::vector<sf::Vertex>& edges)
+{
+
+    if (nodes.empty()) return;
+
+    float windowWidth = window.getSize().x;
+    float windowHeight = window.getSize().y;
+
+    // Step 1: Find bounds (min/max X and Y from node positions)
+    float minX = std::numeric_limits<float>::max();
+    float minY = std::numeric_limits<float>::max();
+    float maxX = std::numeric_limits<float>::lowest();
+    float maxY = std::numeric_limits<float>::lowest();
+    sf::Font font;
+    if(!font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
+    {
+
+    }
+    for (const auto& node : nodes) {
+        auto pos = node.getPosition();
+        minX = std::min(minX, pos.x);
+        minY = std::min(minY, pos.y);
+        maxX = std::max(maxX, pos.x);
+        maxY = std::max(maxY, pos.y);
+    }
+
+    float dataWidth = maxX - minX;
+    float dataHeight = maxY - minY;
+
+    float padding = 40.f; // Space around the edges
+    float scaleX = (windowWidth - 2 * padding) / dataWidth;
+    float scaleY = (windowHeight - 2 * padding) / dataHeight;
+
+    sf::Vector2f offset(padding - minX * scaleX, padding - minY * scaleY);
+
+
+    // Step 2: Draw everything
+    window.clear();
+
+    // Transform and draw edges
+    std::vector<sf::Vertex> transformedEdges;
+    for (size_t i = 0; i < edges.size(); ++i) {
+        auto pos = edges[i].position;
+        sf::Vector2f newPos(pos.x * scaleX + offset.x, pos.y * scaleY + offset.y);
+        if(!(newPos.x == 0 && newPos.y == 0))
+        {
+            transformedEdges.push_back(sf::Vertex(newPos, edges[i].color));
+        }
+        
+    }
+
+    if (!transformedEdges.empty())
+    {
+        
+        window.draw(&transformedEdges[0], transformedEdges.size(), sf::Lines);
+        window.display();
+     //   sf::sleep(sf::seconds(1));
+        
+       /*
+              for (size_t i = 0; i < transformedEdges.size(); i += 2)
+    {
+       // window.clear();
+
+        // Draw the current edge
+        window.draw(&transformedEdges[i], 2, sf::Lines);
+
+     //   window.display();
+
+     //  sf::sleep(sf::seconds(0.05)); 
+    }
+       */
+
+
+    }
+
+
+    for (const auto& node : nodes) {
+        sf::CircleShape transformed = node;
+        auto pos = node.getPosition();
+        transformed.setPosition(pos.x * scaleX + offset.x, pos.y * scaleY + offset.y);
+        window.draw(transformed);
+
+        sf::Text label;
+        label.setFont(font);
+        label.setCharacterSize(12);
+        label.setFillColor(sf::Color::White);
+        std::ostringstream posStream;
+        posStream << std::fixed << std::setprecision(2)
+                << "(" << node.getPosition().x << ", " << node.getPosition().y << ")";
+        label.setString(posStream.str());
+
+        
+        label.setPosition(transformed.getPosition().x + 5, transformed.getPosition().y - 5); // Offset from node center
+        window.draw(label);
+
+      //  window.display();
+     //   sf::sleep(sf::seconds(0.05));
+
+      //  Logger::info("Drawing:(" + std::to_string((double)node.getPosition().x) + "," + std::to_string((double)node.getPosition().y) + ")", "drawlog.txt");
+    }
+
+
+
+    window.display();
+}
+
+
+std::vector<std::pair<std::string ,coord>> ProblemInstance::getNodeCoordSection()
 {
        
-    std::vector<coord> coords;
+    std::vector<std::pair<std::string ,coord>> coords;
 
     for (const auto& entry : node_coord_section) {
-        coords.push_back(entry.second);  
+        if(entry.second.x != 0 && entry.second.y != 0)
+        {
+            coords.push_back(entry);  
+            coord c = entry.second;
+            Logger::info("Pushed back: " + c.to_string(), "nodecoord.txt");
+        }
+
     }
     //std::reverse(coords.begin(), coords.end());
     return coords;
@@ -243,15 +463,8 @@ std::vector<coord> ProblemInstance::getNodeCoordSection()
 
 std::vector<coord> ProblemInstance::randomSol(unsigned int seed)
 {
-    Logger::info("Creating random solution",debugfile);
-    Logger::info("Retrieving route",debugfile);
-    std::vector<coord> route = getNodeCoordSection();
-    Logger::info("Generating seed",debugfile);
-    std::mt19937 gen(seed);
-    Logger::info("shuffling route",debugfile);
-    std::shuffle(route.begin()+1, route.end(), gen);
-    Logger::info("returning route",debugfile);
-    return route;
+    std::vector<coord> c;
+    return c;
 }
 
 std::map<std::string, std::vector<std::pair<std::string, double>>> ProblemInstance::getAdjList()
