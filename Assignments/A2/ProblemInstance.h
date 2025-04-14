@@ -44,6 +44,7 @@ class ProblemInstance
         double Q = 1;
         std::vector<std::pair<double, sf::Vertex>> edges; 
         std::vector<std::pair<double, sf::Vertex>> alledges;   
+        int runNum = 1;
 
 
 

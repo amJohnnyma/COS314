@@ -409,6 +409,7 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
     //for each vehicle calculate the scores
     for(auto & v : vehicles)
     {
+
         Logger::info("Vehicle: ", update);
         Logger::info(v.to_string(), update);
 
@@ -593,12 +594,12 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                            alledges[ec].first += (1/p.second); 
                            alledges[ec+1].first += (1/p.second);
 
-                         //  edges.push_back(alledges[ec+1]);
-                         //  edges.push_back(alledges[ec]);
+                           edges.push_back(alledges[ec+1]);
+                           edges.push_back(alledges[ec]);
                            
                            //maybe only push back edges at the end                           
                            
-                           
+                         
                        }
                        else{
                            //take previous edge as destination
@@ -606,10 +607,8 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                            alledges[ec].first += (Q/p.second); 
                            alledges[ec-1].first += (Q/p.second);
 
-                          // edges.push_back(alledges[ec-1]);
-                          // edges.push_back(alledges[ec]);
-
-
+                           edges.push_back(alledges[ec-1]);
+                           edges.push_back(alledges[ec]);
                            
                            
    
@@ -634,9 +633,34 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
     /*
         for(auto & i : visited)
     {
-        Logger::info("Visited: " + i.to_string(), update);
+    Logger::info("Visited: " + i.to_string(), update);
+      for(const auto & e : alledges)
+      {
+        if(areCoordsEqual(i, coord(0, e.second.position.x, e.second.position.y)))
+        {
+            // Check if already in edges
+            bool exists = false;
+            for (const auto& existing : edges)
+            {
+                if (existing.first == e.first &&
+                    existing.second.position == e.second.position)
+                {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists)
+                edges.push_back(e);
+
+            break;
+        }
+      }
     }
-*/
+    */
+
+
+
     for(auto & i : edges)
     {
         coord ec(i.first, i.second.position.x, i.second.position.y);        
@@ -649,35 +673,21 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
     for(auto & i : alledges)
     {
         i.first *= (1-evaporationRate); 
-    }
+    }  
+
+
 
     
-        for(auto & v : vehicles)
-        {
-            Logger::info("Vehicle: ", update);
-            Logger::info(v.to_string(), update);
 
-            for(auto & p : v.path)
-            {
-                for(auto & e : alledges)
-                {
-                    if(areCoordsEqual(p.second, coord(0,e.second.position.x, e.second.position.y)))
-                    {
-                        edges.push_back(e);
-                        break;
-                    }
-                }
-            }
-        }
-    
-
-
+    runNum++;
 }
 
 void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::CircleShape>& nodes/*, const std::vector<std::pair<double, sf::Vertex>>& edges*/)
 {
 
     if (nodes.empty()) return;
+
+
 
     float windowWidth = window.getSize().x;
     float windowHeight = window.getSize().y;
@@ -692,6 +702,7 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
     {
 
     }
+
     for (const auto& node : nodes) {
         auto pos = node.getPosition();
         minX = std::min(minX, pos.x);
@@ -714,13 +725,23 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
     window.clear();
 
     // Transform and draw edges
+    bool hasDepot = false;
     std::vector<sf::Vertex>transformedEdges;
     for (size_t i = 0; i < edges.size(); ++i) {
         auto pos = edges[i].second.position;
+        if(areCoordsEqual(coord(0,pos.x, pos.y), depot.second))
+        {
+     //       hasDepot = !hasDepot;
+        }
+
+      //  if(hasDepot)
+        {
+        Logger::info("hasDepot: " + coord(0,pos.x, pos.y).to_string(), "draw.txt");
         sf::Vector2f newPos(pos.x * scaleX + offset.x, pos.y * scaleY + offset.y);
         if(!(newPos.x == 0 && newPos.y == 0))
         {
             transformedEdges.push_back( sf::Vertex(newPos, edges[i].second.color));
+        }
         }
         
     }
@@ -728,7 +749,7 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
     if (!transformedEdges.empty())
     {
 
-        window.draw(&transformedEdges[0],transformedEdges.size() , sf::LineStrip);            
+        window.draw(&transformedEdges[0],transformedEdges.size() ,sf::Lines);            
 
         
        // window.draw(&transformedEdges[0], transformedEdges.size(), sf::Lines);
