@@ -370,6 +370,9 @@ void ProblemInstance::solveProblem()
     sf::sleep(sf::seconds(2));
     update(nCircles); 
     render(window, nCircles); 
+  //  sf::sleep(sf::seconds(2));
+  //  update(nCircles); 
+  //  render(window, nCircles); 
     while (window.isOpen()) {
         handleEvents(window); 
           
@@ -419,21 +422,22 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
         std::vector<std::pair<std::pair<coord,double>, double>> scores = {};
         std::vector<std::pair<coord, double>> calculatedScore = {};
         //check edge vertexes to get pheromone value of a node
-        for(auto & cp : curPath)
+        auto cp = curPath.back();
         {
-            Logger::info("Checking current path", update);
+            Logger::info("Checking current path: " + cp.second.to_string(), update);
             //if we are at the depot check if we are starting or ending
             if(cp.second == depot.second)
             {
+                if(curPath.size() > 1) // We want to go to the next node and process that instead
+                {
+                    continue;
+                }
                 Logger::info("At a depot", update);
                 if(atDepot)
                 {
                     Logger::info("First depot", update);
                     atDepot = false; //Going to move away from depot
-                    if(curPath.size() > 1)
-                    {
-                        break;
-                    }
+
                 }
                 else{
                     //We have finished the path checking
@@ -481,7 +485,7 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                      //   Logger::info("GIMME THE Score: " + std::to_string(getNodeScore(coord(0,alledges[ec-1].second.position.x, alledges[ec-1].second.position.y)).score), update);
 
                     }
-                    Logger::info("Destination edge " + destinationEdge.to_string(), update);
+                 //   Logger::info("Destination edge " + destinationEdge.to_string(), update);
 
                     for(const auto& cur : nodes)
                     {
@@ -492,7 +496,10 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                         }
                     }
                    
-
+                    if(areCoordsEqual(destinationEdge, depot.second))
+                    {
+                        continue;
+                    }
 
                     //We are connected to this edge from cp so calculate heuristic
 
@@ -510,8 +517,8 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                                 alledges[ec].first                            
                         };
                         scores.push_back(thisScore);
-                        Logger::info("Pushed score: " + thisScore.first.first.to_string(), update);
-                        Logger::info("Distance: " + std::to_string(v.travelDistance + distance(destinationEdge,cp.second) + distance(destinationEdge, depot.second)), update);
+                    //    Logger::info("Pushed score: " + thisScore.first.first.to_string(), update);
+                      //  Logger::info("Distance: " + std::to_string(v.travelDistance + distance(destinationEdge,cp.second) + distance(destinationEdge, depot.second)), update);
                         
                     }
                     else{
@@ -563,7 +570,7 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                     }
                 }
                 curPath.push_back({id, added});
-                curPath.push_back(depot);
+                
 
                 //update pheromones for p.first
                 for(int ec = 0; ec < alledges.size(); ec++)
@@ -586,8 +593,11 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                            alledges[ec].first += (1/p.second); 
                            alledges[ec+1].first += (1/p.second);
 
-                           edges.push_back(alledges[ec]);
-                           edges.push_back(alledges[ec+1]);
+                         //  edges.push_back(alledges[ec+1]);
+                         //  edges.push_back(alledges[ec]);
+                           
+                           //maybe only push back edges at the end                           
+                           
                            
                        }
                        else{
@@ -596,8 +606,12 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                            alledges[ec].first += (Q/p.second); 
                            alledges[ec-1].first += (Q/p.second);
 
-                           edges.push_back(alledges[ec]);
-                           edges.push_back(alledges[ec-1]);
+                          // edges.push_back(alledges[ec-1]);
+                          // edges.push_back(alledges[ec]);
+
+
+                           
+                           
    
                        }
                        
@@ -607,6 +621,7 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                   
                 }                
                 changes = true;
+                curPath.push_back(depot);
                 v.path = curPath;
                 break;
             }
@@ -621,14 +636,14 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
     {
         Logger::info("Visited: " + i.to_string(), update);
     }
-
+*/
     for(auto & i : edges)
     {
         coord ec(i.first, i.second.position.x, i.second.position.y);        
-        Logger::info("Edges added: " + ec.to_string(), update);
+        Logger::info("Edges added: " + ec.to_string(), "edges.txt");
 
     }
-    */
+    
 
 
     for(auto & i : alledges)
@@ -638,10 +653,22 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
 
     
         for(auto & v : vehicles)
-    {
-        Logger::info("Vehicle: ", update);
-        Logger::info(v.to_string(), update);
-    }
+        {
+            Logger::info("Vehicle: ", update);
+            Logger::info(v.to_string(), update);
+
+            for(auto & p : v.path)
+            {
+                for(auto & e : alledges)
+                {
+                    if(areCoordsEqual(p.second, coord(0,e.second.position.x, e.second.position.y)))
+                    {
+                        edges.push_back(e);
+                        break;
+                    }
+                }
+            }
+        }
     
 
 
@@ -700,8 +727,11 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
 
     if (!transformedEdges.empty())
     {
+
+        window.draw(&transformedEdges[0],transformedEdges.size() , sf::LineStrip);            
+
         
-        window.draw(&transformedEdges[0], transformedEdges.size(), sf::Lines);
+       // window.draw(&transformedEdges[0], transformedEdges.size(), sf::Lines);
 
         sf::Text label;
         label.setFont(font);
