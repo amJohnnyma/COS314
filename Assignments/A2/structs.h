@@ -46,4 +46,26 @@ struct VectorHash {
     }
 };
 
+
+struct vehicle
+{
+    double tmax;
+    double score;
+    //path -> node ID, node coord
+    std::vector<std::pair<std::string, coord>> path;
+    double travelDistance;
+
+    std::string to_string()
+    {
+        std::string p = "\nPath:\n";
+        for(const auto &i : path)
+        {
+            coord c = i.second;
+            p += "(" + i.first + ")" + c.to_string() + "\n";
+        }
+        return "Tmax:" + std::to_string(tmax) + " Score:" + std::to_string(score) + " travelDistance:" + std::to_string(travelDistance) + p;
+    }
+};
+
+
 #endif

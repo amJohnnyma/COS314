@@ -26,18 +26,23 @@ class ProblemInstance
         std::string tMaxString;
         double tmax;
         int score;
-        coord depot;
+        std::vector<coord> visited;
+        std::vector<vehicle> vehicles;
+        std::pair<std::string, coord> depot;
         std::map<std::string, coord> node_coord_section;
         std::map<std::string, std::vector<std::pair<std::string, double>>> adjList;
         std::string debugfile = "TOP";
         int id = 1;
         bool changes = true;
-        double pheremones = 0.1;
+        double pheromones = 0.1;
+        double n; //heuristic value
+        double s; //score
+        double c; // travel cost
 
 
-        void update(std::vector<sf::CircleShape>& nCircles, std::vector<sf::Vertex>& edges);
+        void update(std::vector<sf::CircleShape>& nCircles, std::vector<std::pair<double, sf::Vertex>>& edges);
         void handleEvents(sf::RenderWindow &window);
-        void render(sf::RenderWindow &window, const std::vector<sf::CircleShape> &nodes, const std::vector<sf::Vertex> &edges);
+        void render(sf::RenderWindow &window, const std::vector<sf::CircleShape> &nodes, const std::vector<std::pair<double, sf::Vertex>> &edges);
 
     public:
         ProblemInstance(std::string filename);
@@ -55,9 +60,10 @@ class ProblemInstance
         double getTmax();
         void solveProblem();
 
-        std::vector<coord> randomSol(unsigned int seed);
+        std::vector<std::pair<std::string, coord>> randomSol(unsigned int seed);
 
         std::vector<std::pair<std::string ,coord>> getNodeCoordSection();
+        std::vector<std::pair<std::string ,coord>> getFeasibleNodes();
         std::map<std::string, std::vector<std::pair<std::string, double>>> getAdjList();
 
         std::map<std::string, coord> getFullCoordInfo();

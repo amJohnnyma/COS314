@@ -69,13 +69,14 @@ ProblemInstance::ProblemInstance(std::string filename)
             int score = numbers[2];
           //  Logger::info(coord(score,x,y).to_string(),debugfile);
           //  if( x != 0 && y != 0)
-                addCoord(x, y, score); 
-
-            if(first)
+            if(first) //assume first node is depot
             {
-                depot = coord(score, x, y);
+                depot = {std::to_string(id), coord(score, x, y)};
                 first = false;
             }
+            addCoord(x, y, score); 
+
+
         }
         else
         {
@@ -236,48 +237,29 @@ double ProblemInstance::getTmax(){
     return tmax;
 }
 
-void ProblemInstance::solveProblem()
+void ProblemInstance::solveProblem() //var to solve problem
 {
-    sf::RenderWindow window(sf::VideoMode(1200, 900), "ACO Visualizer");
 
-  //  std::map<std::string, coord> node_coord_section;
-  //  std::map<std::string, std::vector<std::pair<std::string, double>>> adjList;
+  // std::cout << depot.first << " " << depot.second.to_string() << std::endl;
+    sf::RenderWindow window(sf::VideoMode(1200, 900), "ACO Visualizer"); //one time run
 
+  std::vector<std::pair<std::string, coord>> nodes = getNodeCoordSection();    //start with all nodes and edges available
+
+
+  //initliaze parameters ////////////////////////////////////////////////////////////INIT START
     std::vector<sf::CircleShape> nCircles;
-    std::vector<sf::Vertex> edges;
- 
-
-
-    while (window.isOpen()) {
-        handleEvents(window); 
-        update(nCircles, edges);        
-        if(changes)
-        {
-            render(window, nCircles, edges); 
-        }           
-        
+    std::vector<std::pair<double, sf::Vertex>> edges;    
+    std::vector<std::pair<std::string, coord>> initPath = {{depot}, {depot}};
+    for(int i =0; i < numVehicles; i++)
+    {
+        vehicle v;
+        v.tmax = tmax;
+        v.path = initPath;
+        v.score = 0;
+        vehicles.push_back(v);
     }
-}
 
-void ProblemInstance::handleEvents(sf::RenderWindow& window)
-{    
-    sf::Event event;
-    while (window.pollEvent(event))
-        if (event.type == sf::Event::Closed)
-        {
-            window.close();
-        }
-
-
-}
-
-void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles, std::vector<sf::Vertex>& edges)
-{
-    std::vector<std::pair<std::string, coord>> nodes = getNodeCoordSection();    
-    //rather retrieve "best solution" and edit that instead of nodes
     
-
-
     std::map<std::string, coord> nodeCoordMap;
     std::set<std::pair<std::string, std::string>> drawn;
 
@@ -320,8 +302,9 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles, std::vector
                 if (drawn.count(pairKey)) continue;
                 drawn.insert(pairKey);
 
-                sf::Vertex start = sf::Vertex(sf::Vector2f(nodePos.x, nodePos.y), sf::Color::Red);  //start
-                sf::Vertex end = sf::Vertex(sf::Vector2f(nodeCoordMap[neighbour.first].x, nodeCoordMap[neighbour.first].y), sf::Color::Red); //end
+                //initialize pheromones
+                std::pair<double, sf::Vertex> start = {pheromones, sf::Vertex(sf::Vector2f(nodePos.x, nodePos.y), sf::Color::Red)};  //start
+                std::pair<double, sf::Vertex> end = {pheromones, sf::Vertex(sf::Vector2f(nodeCoordMap[neighbour.first].x, nodeCoordMap[neighbour.first].y), sf::Color::Red)}; //end
                 
                 edges.push_back(start);
                 edges.push_back(end);
@@ -334,9 +317,115 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles, std::vector
         }
 
     }
+////////////////////////////////////////////////////////////////////INIT END
+
+    
+
+ 
+
+
+    while (window.isOpen()) {
+        handleEvents(window); 
+        update(nCircles, edges);        
+        if(changes)
+        {
+            render(window, nCircles, edges); 
+        }           
+        
+    }
 }
 
-void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::CircleShape>& nodes, const std::vector<sf::Vertex>& edges)
+void ProblemInstance::handleEvents(sf::RenderWindow& window)
+{    
+    sf::Event event;
+    while (window.pollEvent(event))
+        if (event.type == sf::Event::Closed)
+        {
+            window.close();
+        }
+
+
+}
+
+void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles, std::vector<std::pair<double, sf::Vertex>>& edges)
+{   
+    std::vector<std::pair<std::string, coord>> nodes;    
+    //rather retrieve "best solution" and edit that instead of nodes
+    
+    
+    //for each vehicle calculate the scores
+    for(auto & v : vehicles)
+    {
+        nodes = getFeasibleNodes(); //make sure cant go to visited nodes
+        bool atDepot = true;
+        std::vector<std::pair<std::string, coord>> curPath = v.path;
+
+        //the score when travelling to a coord
+        std::vector<std::pair<coord,double>> scores = {};
+        //check edge vertexes to get pheromone value of a node
+        for(auto & cp : curPath)
+        {
+            //if we are at the depot check if we are starting or ending
+            if(cp.second == depot.second)
+            {
+                if(atDepot)
+                {
+                    atDepot = false; //Going to move away from depot
+                }
+                else{
+                    //We have finished the path checking
+                    continue;
+                }
+            }
+
+            //now go through nodes and calculate scores
+            //Start at cp (current node)
+            //compare to the edges
+            for(auto& e : edges)
+            {
+                //the vertex of the edge (a vertex matches then the edge is connected) NOT CORRECT
+                coord edgePos(cp.second.score,e.second.position.x,e.second.position.y);
+                if(edgePos == cp.second)
+                {
+                    //We are connected to this edge from cp so calculate heuristic
+
+                    //We can still travel here
+                    //Vehicles total travel cant exceed tmax
+                    // depot -> nodes -> depot
+                    // total distance travelled + distance to node + distance to depot from next node <= tmax
+                    if((v.travelDistance + distance(edgePos,cp.second) + distance(edgePos, depot.second)) <=tmax)
+                    {
+                        double newScore;
+                        //find the nodes score
+
+                        std::pair<coord, double> thisScore = {edgePos, 0};
+                    }
+                }
+            }
+
+
+        }
+
+
+    }
+    
+    
+    //generate random sol
+    //calculate fitness
+    //update pheromone
+    //apply transtition
+
+    //new path
+    
+    //iteration = N?
+        //yes end
+        //no repeat from random sol
+
+
+
+}
+
+void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::CircleShape>& nodes, const std::vector<std::pair<double, sf::Vertex>>& edges)
 {
 
     if (nodes.empty()) return;
@@ -380,11 +469,11 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
 
     std::vector<sf::Vertex> transformedEdges;
     for (size_t i = 0; i < edges.size(); ++i) {
-        auto pos = edges[i].position;
+        auto pos = edges[i].second.position;
         sf::Vector2f newPos(pos.x * scaleX + offset.x, pos.y * scaleY + offset.y);
         if(!(newPos.x == 0 && newPos.y == 0))
         {
-            transformedEdges.push_back(sf::Vertex(newPos, edges[i].color));
+            transformedEdges.push_back(sf::Vertex(newPos, edges[i].second.color));
         }
         
     }
@@ -475,9 +564,26 @@ std::vector<std::pair<std::string ,coord>> ProblemInstance::getNodeCoordSection(
     return coords;
 }
 
-std::vector<coord> ProblemInstance::randomSol(unsigned int seed)
+std::vector<std::pair<std::string, coord>> ProblemInstance::getFeasibleNodes()
 {
-    std::vector<coord> c;
+    std::vector<std::pair<std::string ,coord>> nodes = getNodeCoordSection();
+    for(auto it = nodes.begin(); it != nodes.end();)
+    {
+        //remove if i if in visited
+        if(std::find(visited.begin(), visited.end(), it->second) != visited.end())
+        {
+            it = nodes.erase(it);
+        }
+        else{
+            it++;
+        }
+    }
+    return nodes;
+}
+
+std::vector<std::pair<std::string, coord>> ProblemInstance::randomSol(unsigned int seed)
+{
+    std::vector<std::pair<std::string, coord>> c;
     return c;
 }
 
