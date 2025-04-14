@@ -365,13 +365,17 @@ void ProblemInstance::solveProblem()
     }
  
 
-
+    update(nCircles); 
+    render(window, nCircles); 
+    sf::sleep(sf::seconds(2));
+    update(nCircles); 
+    render(window, nCircles); 
     while (window.isOpen()) {
         handleEvents(window); 
-        update(nCircles);   
+          
         if(changes)
         {
-            render(window, nCircles); 
+        //    render(window, nCircles); 
             changes = false;
         }           
         
@@ -426,12 +430,19 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                 {
                     Logger::info("First depot", update);
                     atDepot = false; //Going to move away from depot
+                    if(curPath.size() > 1)
+                    {
+                        break;
+                    }
                 }
                 else{
                     //We have finished the path checking
                     Logger::info("Second depot", update);
                     break;
                 }
+            }
+            else{
+                Logger::info("Not at depot", update);
             }
             selected = cp.second;
           //  Logger::info("Selected " + selected.to_string() , update);
@@ -541,7 +552,8 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                 coord added = p.first;
                 Logger::info("Adding to visited " +added.to_string(), update);
 
-                v.travelDistance += distance(selected, p.first);
+                v.travelDistance += distance(selected, p.first) + distance(p.first,depot.second);
+                v.score += p.second;
 
                 std::string id = "";
                 for (const auto& node : nodes) {
@@ -624,13 +636,13 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
         i.first *= (1-evaporationRate); 
     }
 
-    /*
+    
         for(auto & v : vehicles)
     {
         Logger::info("Vehicle: ", update);
         Logger::info(v.to_string(), update);
     }
-    */
+    
 
 
 }
@@ -739,15 +751,7 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
         
         label.setPosition(transformed.getPosition().x + 5, transformed.getPosition().y - 5); // Offset from node center
         window.draw(label);
-
-      //  window.display();
-     //   sf::sleep(sf::seconds(0.05));
-
-      //  Logger::info("Drawing:(" + std::to_string((double)node.getPosition().x) + "," + std::to_string((double)node.getPosition().y) + ")", "drawlog.txt");
     }
-
-
-
     window.display();
 }
 
