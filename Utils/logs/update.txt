@@ -1,0 +1,151 @@
+[2025-04-14 15:33:49] [INFO] Updating...
+[2025-04-14 15:33:49] [INFO] Vehicle: 
+[2025-04-14 15:33:49] [INFO] Tmax:7.500000 Score:0.000000 travelDistance:0.000000
+Path:
+(1)Score: 0	19.100000, 24.300000
+(1)Score: 0	19.100000, 24.300000
+
+[2025-04-14 15:33:49] [INFO] Checking current path
+[2025-04-14 15:33:49] [INFO] At a depot
+[2025-04-14 15:33:49] [INFO] First depot
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	12.600000, 24.900000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	14.400000, 28.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	16.900000, 28.100000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	20.700001, 28.200001
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	12.500000, 26.600000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	21.799999, 27.299999
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	12.500000, 22.600000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	22.500000, 17.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	19.900000, 15.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	14.900000, 15.100000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	11.500000, 18.600000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	12.400000, 29.799999
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	17.799999, 28.100000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 40	9.100000, 29.799999
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 40	10.000000, 32.599998
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 40	13.900000, 33.099998
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 40	19.950001, 10.300000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 40	15.200000, 8.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 50	14.700000, 31.200001
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 50	7.400000, 36.500000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 50	21.000000, 25.500000
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 50	21.000000, 25.500000
+[2025-04-14 15:33:49] [INFO] Distance: 4.494441
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	18.000000, 25.299999
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 10	18.000000, 25.299999
+[2025-04-14 15:33:49] [INFO] Distance: 2.973213
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	19.500000, 24.700001
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 10	19.500000, 24.700001
+[2025-04-14 15:33:49] [INFO] Distance: 1.131372
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	21.400000, 21.799999
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 10	21.400000, 21.799999
+[2025-04-14 15:33:49] [INFO] Distance: 6.794116
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	16.000000, 21.400000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 10	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Distance: 3.905126
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	17.900000, 28.900000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	14.300000, 19.900000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	17.000000, 19.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	10.800000, 21.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	15.700000, 23.700001
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 10	15.700000, 23.700001
+[2025-04-14 15:33:49] [INFO] Distance: 6.905071
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 0	18.200001, 24.000000
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 0	18.200001, 24.000000
+[2025-04-14 15:33:49] [INFO] Distance: 1.897365
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 50	21.000000, 25.500000	0.274310
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 10	18.000000, 25.299999	0.150828
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 10	19.500000, 24.700001	0.244507
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 10	21.400000, 21.799999	0.099776
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 10	18.650000, 26.200001	0.131606
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 10	15.700000, 23.700001	0.098972
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 0	18.200001, 24.000000	0.000000
+[2025-04-14 15:33:49] [INFO] Randomly chose score 
+[2025-04-14 15:33:49] [INFO] Adding to visited Score: 10	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Equal coords: Score: 10	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Vehicle: 
+[2025-04-14 15:33:49] [INFO] Tmax:7.500000 Score:0.000000 travelDistance:0.000000
+Path:
+(1)Score: 0	19.100000, 24.300000
+(1)Score: 0	19.100000, 24.300000
+
+[2025-04-14 15:33:49] [INFO] Checking current path
+[2025-04-14 15:33:49] [INFO] At a depot
+[2025-04-14 15:33:49] [INFO] First depot
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	12.600000, 24.900000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	14.400000, 28.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	16.900000, 28.100000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	20.700001, 28.200001
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	12.500000, 26.600000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	21.799999, 27.299999
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	12.500000, 22.600000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	22.500000, 17.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	19.900000, 15.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	14.900000, 15.100000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	11.500000, 18.600000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	12.400000, 29.799999
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 30	17.799999, 28.100000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 40	9.100000, 29.799999
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 40	10.000000, 32.599998
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 40	13.900000, 33.099998
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 40	19.950001, 10.300000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 40	15.200000, 8.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 50	14.700000, 31.200001
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 50	7.400000, 36.500000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 50	21.000000, 25.500000
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 50	21.000000, 25.500000
+[2025-04-14 15:33:49] [INFO] Distance: 4.494441
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	18.000000, 25.299999
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 10	18.000000, 25.299999
+[2025-04-14 15:33:49] [INFO] Distance: 2.973213
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	19.500000, 24.700001
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 10	19.500000, 24.700001
+[2025-04-14 15:33:49] [INFO] Distance: 1.131372
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	21.400000, 21.799999
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 10	21.400000, 21.799999
+[2025-04-14 15:33:49] [INFO] Distance: 6.794116
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	16.000000, 21.400000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 10	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Distance: 3.905126
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	17.900000, 28.900000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	14.300000, 19.900000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	17.000000, 19.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 20	10.800000, 21.000000
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 10	15.700000, 23.700001
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 10	15.700000, 23.700001
+[2025-04-14 15:33:49] [INFO] Distance: 6.905071
+[2025-04-14 15:33:49] [INFO] Destination edge Score: 0	18.200001, 24.000000
+[2025-04-14 15:33:49] [INFO] Pushed score: Score: 0	18.200001, 24.000000
+[2025-04-14 15:33:49] [INFO] Distance: 1.897365
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 50	21.000000, 25.500000	0.135588
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 10	18.000000, 25.299999	0.074552
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 10	19.500000, 24.700001	0.120857
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 10	21.400000, 21.799999	0.049318
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 10	18.650000, 26.200001	0.570764
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 10	15.700000, 23.700001	0.048920
+[2025-04-14 15:33:49] [INFO] Pheromone scores: Score: 0	18.200001, 24.000000	0.000000
+[2025-04-14 15:33:49] [INFO] Randomly chose score 
+[2025-04-14 15:33:49] [INFO] Adding to visited Score: 10	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Equal coords: Score: 10	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Visited: Score: 10	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Visited: Score: 10	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Edges added: Score: 7	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Edges added: Score: 7	19.100000, 24.299999
+[2025-04-14 15:33:49] [INFO] Edges added: Score: 9	18.650000, 26.200001
+[2025-04-14 15:33:49] [INFO] Edges added: Score: 9	19.100000, 24.299999
+[2025-04-14 15:33:49] [INFO] Vehicle: 
+[2025-04-14 15:33:49] [INFO] Tmax:7.500000 Score:0.000000 travelDistance:1.952563
+Path:
+(1)Score: 0	19.100000, 24.300000
+()Score: 10	18.650000, 26.200001
+(1)Score: 0	19.100000, 24.300000
+
+[2025-04-14 15:33:49] [INFO] Vehicle: 
+[2025-04-14 15:33:49] [INFO] Tmax:7.500000 Score:0.000000 travelDistance:1.952563
+Path:
+(1)Score: 0	19.100000, 24.300000
+()Score: 10	18.650000, 26.200001
+(1)Score: 0	19.100000, 24.300000
+

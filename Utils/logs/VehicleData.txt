@@ -1,8 +1,0 @@
-[2025-04-14 11:42:56] [INFO] Vehicle info: Tmax:7.500000 Score:0.000000 travelDistance:0.000000
-Path: (1)Score: 0	19.100000, 24.300000
-(1)Score: 0	19.100000, 24.300000
-
-[2025-04-14 11:42:56] [INFO] Vehicle info: Tmax:7.500000 Score:0.000000 travelDistance:0.000000
-Path: (1)Score: 0	19.100000, 24.300000
-(1)Score: 0	19.100000, 24.300000
-
