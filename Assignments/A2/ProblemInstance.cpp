@@ -389,6 +389,7 @@ void ProblemInstance::solveProblem()
 
         
 
+/*
     update(nCircles); 
     render(window, nCircles); 
     
@@ -397,17 +398,23 @@ void ProblemInstance::solveProblem()
     update(nCircles); 
     render(window, nCircles); 
     sf::sleep(sf::seconds(2));
-    window.close();
   //  update(nCircles); 
   //  render(window, nCircles); 
+*/
+
     while (window.isOpen()) {
-        handleEvents(window); 
-          
-        if(changes)
-        {
-        //    render(window, nCircles); 
-            changes = false;
-        }           
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+    
+            if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::KeyPressed) {
+                update(nCircles);
+                render(window, nCircles);
+                sf::sleep(sf::milliseconds(100));
+            }
+        }         
         
     }
 }
@@ -596,20 +603,17 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                     4-5  
                     */
                    coord edgePos(alledges[ec].first);
-                   if(areCoordsEqual(edgePos,added))
+                   for(auto & eu : alledges[ec].second)
                    {
-                       Logger::info("Equal coords: " + added.to_string(), update);
+                    if(areCoordsEqual(eu.second.first,added))
+                    {
+                        eu.first += (Q/p.second);
+                        continue;
+                    }
+                    eu.first *= (1-evaporationRate);
 
-                           for(auto & eu : alledges[ec].second)
-                           {
-                            eu.first += (1/p.second);
-                           }                        
-                           
-   
-                       
-                       
-                       break;
-                   }
+                   }   
+
                    
                   
                 }                
@@ -621,7 +625,7 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
             
         }
 
-       // Logger::info(v.to_string(), "VehicleData.txt");
+
     }
 
    // std::pair<double, sf::Vertex> depotEdge = {depot.second.score, sf::Vertex(sf::Vector2f(depot.second.x, depot.second.y))};
@@ -645,34 +649,6 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
         Logger::info("Visted: " + i.to_string(), update);
 
     }
-
-
-    /*
-    Logger::info("Visited: " + i.to_string(), update);
-      for(const auto & e : alledges)
-      {
-        if(areCoordsEqual(i, coord(0, e.second.position.x, e.second.position.y)))
-        {
-            // Check if already in edges
-            bool exists = false;
-            for (const auto& existing : edges)
-            {
-                if (existing.first == e.first &&
-                    existing.second.position == e.second.position)
-                {
-                    exists = true;
-                    break;
-                }
-            }
-
-            if (!exists)
-                edges.push_back(e);
-
-            break;
-        }
-      }
-    }
-    */
 
 
 
@@ -705,6 +681,15 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
         Logger::info("Vehicles: " + i.to_string(), "update.txt");
         std::vector<std::pair<std::string, coord>> path = i.path;
         
+    }
+
+    for(auto & i : alledges)
+    {
+        Logger::info("Coord" + i.first.to_string(), "P.txt");
+        for(auto& j : i.second)
+        {
+            Logger::info("Pheromones: " + std::to_string(j.first), "P.txt");
+        }
     }
     
     float windowWidth = window.getSize().x;
@@ -746,12 +731,16 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
     bool started = false;
     bool ended = false;
     std::vector<sf::Vertex>transformedEdges;
+    std::vector<int> size;
+    int count = 0;
     for (size_t i = 0; i < edges.size(); ++i) {
+        
         auto pos = edges[i].second.position;
         if(areCoordsEqual(coord(0,pos.x, pos.y), depot.second))
         {
            if(!started)
            {
+            count = 0;
             started = true;
            }
            else{
@@ -769,12 +758,14 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
         {
             sf::Color randomColour(rand()%256, rand()%256, rand()%256);
             transformedEdges.push_back( sf::Vertex(newPos, randomColour));
+            count++;
         }
         }
         if(ended)
         {
             started = false;
             ended = false;
+            size.push_back(count);
         }
         
     }
@@ -790,9 +781,10 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
         */
        //runNum + 1 
        //runNum * numVehicles = inner nodes
-        for(int i = 0; i < (runNum * numVehicles) +(numVehicles); i+=3)
+       
+        for(int i = 0; i < transformedEdges.size(); i+=3)
         {
-            window.draw(&transformedEdges[i],(runNum + 1) ,sf::LineStrip);            
+            window.draw(&transformedEdges[i], size[i/3] ,sf::LineStrip);            
 
         }
 

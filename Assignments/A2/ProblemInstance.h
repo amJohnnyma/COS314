@@ -49,6 +49,8 @@ class ProblemInstance
         std::vector<std::pair<coord, std::vector<std::pair<double, std::pair<coord, sf::Vertex>>>>> alledges;
         int runNum = 1;
 
+        
+
 
 
 
