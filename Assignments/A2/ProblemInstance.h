@@ -30,6 +30,8 @@ class ProblemInstance
         std::vector<vehicle> vehicles;
         std::pair<std::string, coord> depot;
         std::map<std::string, coord> node_coord_section;
+
+        //id, vector<{id , distance}>
         std::map<std::string, std::vector<std::pair<std::string, double>>> adjList;
         std::string debugfile = "TOP";
         int id = 1;
@@ -43,7 +45,8 @@ class ProblemInstance
         double evaporationRate = 0.1;
         double Q = 1;
         std::vector<std::pair<double, sf::Vertex>> edges; 
-        std::vector<std::pair<double, sf::Vertex>> alledges;   
+      //  std::vector<std::pair<double, std::pair<coord,sf::Vertex>>> alledges;   
+        std::vector<std::pair<coord, std::vector<std::pair<double, std::pair<coord, sf::Vertex>>>>> alledges;
         int runNum = 1;
 
 

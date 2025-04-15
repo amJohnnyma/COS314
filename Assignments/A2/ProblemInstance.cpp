@@ -288,6 +288,23 @@ double ProblemInstance::pheromoneCalc(double Tij, double Nij,std::vector<std::pa
 
     return top / bottom;
 }
+bool edgeExists(
+    const std::vector<std::pair<double, std::pair<coord, sf::Vertex>>>& alledges,
+    const std::pair<double, std::pair<coord, sf::Vertex>>& candidate,
+    double epsilon = 1e-4
+) {
+    for (const auto& e : alledges) {
+        // Check if coord matches (score, x, y)
+        const coord& a = e.second.first;
+        const coord& b = candidate.second.first;
+        if(areCoordsEqual(a,b))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ProblemInstance::solveProblem()
 {
     sf::RenderWindow window(sf::VideoMode(1200, 900), "ACO Visualizer");
@@ -325,7 +342,6 @@ void ProblemInstance::solveProblem()
     {
         coord c = i.second;
       //  Logger::info("Map Node: " + i.first + " = " + c.to_string(), "solveProblem.txt");
-
         nodeCoordMap[i.first] = i.second;
     }
  
@@ -334,43 +350,54 @@ void ProblemInstance::solveProblem()
 
 
     for(const auto & [id ,otherNode] : adjList)
-    {
-        const std::string& fID = id;
-        const coord & nodePos = nodeCoordMap[fID];
-        //get matching ID in node_coord_section
-        for(const auto & neighbour : otherNode)
+    {      
+        //id, vector<{id , distance}> 
+        //adjlist
+        //fromCoord, vector<{pheromone, {toCoord, Vertex}}
+        //        std::vector<std::pair<coord, std::vector<std::pair<double, std::pair<coord, sf::Vertex>>>>> alledges;
+        coord fromCoord = nodeCoordMap[id];
+        std::pair<coord, std::vector<std::pair<double, std::pair<coord, sf::Vertex>>>> newEdges;
+        std::vector<std::pair<double, std::pair<coord, sf::Vertex>>> connEdges = {};
+        for(const auto & [nid, distance]:  otherNode)
         {
-
-
-            auto it = nodeCoordMap.find(neighbour.first);
-            if(it != nodeCoordMap.end())
-            {
-                auto pairKey = std::minmax(fID, neighbour.first);
-                if (drawn.count(pairKey)) continue;
-                drawn.insert(pairKey);
-
-                std::pair<double, sf::Vertex> start = {pheromones, sf::Vertex(sf::Vector2f(nodePos.x, nodePos.y), sf::Color::Red)};  //start
-                std::pair<double, sf::Vertex> end = {pheromones, sf::Vertex(sf::Vector2f(nodeCoordMap[neighbour.first].x, nodeCoordMap[neighbour.first].y), sf::Color::Red)}; //end
-                
-                alledges.push_back(start);
-                alledges.push_back(end);
-            }
-            else{
-                std::cout << neighbour.first << std::endl;
-                std::cout << "COORD NOT FOUND" << std::endl;
-            }
-
+           // std::vector<std::pair<double, std::pair<coord, sf::Vertex>>> connEdges;
+            coord nCoord = nodeCoordMap[nid];
+            std::pair<double, std::pair<coord, sf::Vertex>> newEdge = {pheromones, {nCoord, sf::Vertex(sf::Vector2f(nCoord.x, nCoord.y), sf::Color::Red)}};
+            connEdges.push_back(newEdge);
         }
+        newEdges.first = fromCoord;
+        newEdges.second = connEdges;
+        alledges.push_back(newEdges);     
+        
+
+
 
     }
- 
 
+    /*
+            for(auto i : alledges)
+        {
+            Logger::info(i.first.to_string() + " Conns: ", "conconcon.txt");
+            for(auto j : i.second)
+            {
+                Logger::info(j.second.first.to_string(), "conconcon.txt");
+
+            }
+        }
+    */
+
+
+        
+
+    update(nCircles); 
+    render(window, nCircles); 
+    
+    sf::sleep(sf::seconds(2));
+   //  window.close();
     update(nCircles); 
     render(window, nCircles); 
     sf::sleep(sf::seconds(2));
-    update(nCircles); 
-    render(window, nCircles); 
-  //  sf::sleep(sf::seconds(2));
+    window.close();
   //  update(nCircles); 
   //  render(window, nCircles); 
     while (window.isOpen()) {
@@ -450,7 +477,7 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                 Logger::info("Not at depot", update);
             }
             selected = cp.second;
-          //  Logger::info("Selected " + selected.to_string() , update);
+            Logger::info("Selected " + selected.to_string() , update);
             //now go through nodes and calculate scores
             //Start at cp (current node)
             //compare to the edges
@@ -462,78 +489,66 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                 2-3
                 4-5  
                 
-                */
+                */               
                 //the vertex of the edge (a vertex matches then the edge is connected)
-                coord edgePos(selected.score,alledges[ec].second.position.x,alledges[ec].second.position.y);
+                        //        std::vector<std::pair<coord, std::vector<std::pair<double, std::pair<coord, sf::Vertex>>>>> alledges;
+
+                coord edgePos(alledges[ec].first);
                 coord destinationEdge;
-               // Logger::info("edgepos: " + edgePos.to_string(), update);
+               Logger::info("edgepos: " + edgePos.to_string(), update);
 
                 if(areCoordsEqual(edgePos, selected))
                 {
-                 //   Logger::info("Matching edge for " + selected.to_string(), update);
+                    Logger::info("Matching edge for " + selected.to_string(), update);
 
-                    //Get the other end of the edge
-                    if(ec%2==0)
+                    for(auto & destEdge : alledges[ec].second)
                     {
-                        //Take next edge as destination
-                        destinationEdge = coord(getNodeScore(coord(0,alledges[ec+1].second.position.x, alledges[ec+1].second.position.y)).score,alledges[ec+1].second.position.x, alledges[ec+1].second.position.y);
-                    //    Logger::info("GIMME THE Score: " + std::to_string(getNodeScore(coord(0,alledges[ec+1].second.position.x, alledges[ec+1].second.position.y)).score), update);
-
-                    }
-                    else{
-                        //take previous edge as destination
-                        destinationEdge = coord(getNodeScore(coord(0,alledges[ec-1].second.position.x, alledges[ec-1].second.position.y)).score,alledges[ec-1].second.position.x, alledges[ec-1].second.position.y);
-                     //   Logger::info("GIMME THE Score: " + std::to_string(getNodeScore(coord(0,alledges[ec-1].second.position.x, alledges[ec-1].second.position.y)).score), update);
-
-                    }
-                 //   Logger::info("Destination edge " + destinationEdge.to_string(), update);
-
-                    for(const auto& cur : nodes)
-                    {
-                        if(areCoordsEqual(coord(0,cur.second.x, cur.second.y), coord(0,destinationEdge.x, destinationEdge.y)))
+                        destinationEdge = destEdge.second.first;
+                        if(areCoordsEqual(destinationEdge, depot.second) && atDepot)
                         {
-                        //    Logger::info("Destination edge found " + destinationEdge.to_string(), update);
-                            break;
+                            Logger::info("At last depot", update);
+                            continue;
+                        }
+                        else{
+                            Logger::info("At first depot finding edges", update);
+                        }
+                        //We are connected to this edge from cp so calculate heuristic
+                        //We can still travel here
+                        //Vehicles total travel cant exceed tmax
+                        // depot -> nodes -> depot
+                        // total distance travelled + distance to node + distance to depot from next node <= tmax
+                        if((v.travelDistance + distance(destinationEdge,cp.second) + distance(destinationEdge, depot.second)) <=tmax && !isVisited(destinationEdge))
+                        {
+                        //  Logger::info("Can travel to edge ", update);
+
+                            //find the nodes score
+                            std::pair<std::pair<coord,double>, double> thisScore = {
+                                {destinationEdge, destinationEdge.score / distance(destinationEdge, cp.second)},
+                                    destEdge.first                            
+                            };
+                            scores.push_back(thisScore);
+                        //    Logger::info("Pushed score: " + thisScore.first.first.to_string(), update);
+                        //   Logger::info("Distance: " + std::to_string(v.travelDistance + distance(destinationEdge,cp.second) + distance(destinationEdge, depot.second)), update);
+                            
+                        }
+                        else{
+                            // Not a valid option
+                        //   Logger::info("Cant travel to edge " , update);
+
                         }
                     }
+
                    
-                    if(areCoordsEqual(destinationEdge, depot.second))
-                    {
-                        continue;
-                    }
 
-                    //We are connected to this edge from cp so calculate heuristic
 
-                    //We can still travel here
-                    //Vehicles total travel cant exceed tmax
-                    // depot -> nodes -> depot
-                    // total distance travelled + distance to node + distance to depot from next node <= tmax
-                    if((v.travelDistance + distance(destinationEdge,cp.second) + distance(destinationEdge, depot.second)) <=tmax && !isVisited(destinationEdge))
-                    {
-                      //  Logger::info("Can travel to edge ", update);
-
-                        //find the nodes score
-                        std::pair<std::pair<coord,double>, double> thisScore = {                            
-                                {destinationEdge, destinationEdge.score / distance(destinationEdge, cp.second)},
-                                alledges[ec].first                            
-                        };
-                        scores.push_back(thisScore);
-                    //    Logger::info("Pushed score: " + thisScore.first.first.to_string(), update);
-                      //  Logger::info("Distance: " + std::to_string(v.travelDistance + distance(destinationEdge,cp.second) + distance(destinationEdge, depot.second)), update);
-                        
-                    }
-                    else{
-                        // Not a valid option
-                      //  Logger::info("Cant travel to edge " , update);
-
-                    }
+                    break;
                 }
             }
 
 
         }
 
-        //now compare scores
+        //now compute scores
         for(const auto & i : scores)
         {
             std::pair<coord, double> Pij;
@@ -552,9 +567,7 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
             {
                 Logger::info("Randomly chose score ", update);
                 //select this node to use
-                //remove last node in curPath
                 //add this node
-                //add depot node
                 //update pheromones
                 visited.push_back(p.first);
                 coord added = p.first;
@@ -582,37 +595,18 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                     2-3
                     4-5  
                     */
-                   coord edgePos(0,alledges[ec].second.position.x,alledges[ec].second.position.y);
+                   coord edgePos(alledges[ec].first);
                    if(areCoordsEqual(edgePos,added))
                    {
                        Logger::info("Equal coords: " + added.to_string(), update);
-                       //Get the other end of the edge
-                       if(ec%2==0)
-                       {
-                           //Take next edge as destination
-                           //update pheromone
-                           alledges[ec].first += (1/p.second); 
-                           alledges[ec+1].first += (1/p.second);
 
-                           edges.push_back(alledges[ec+1]);
-                           edges.push_back(alledges[ec]);
-                           
-                           //maybe only push back edges at the end                           
-                           
-                         
-                       }
-                       else{
-                           //take previous edge as destination
-                           //update pheromone
-                           alledges[ec].first += (Q/p.second); 
-                           alledges[ec-1].first += (Q/p.second);
-
-                           edges.push_back(alledges[ec-1]);
-                           edges.push_back(alledges[ec]);
-                           
+                           for(auto & eu : alledges[ec].second)
+                           {
+                            eu.first += (1/p.second);
+                           }                        
                            
    
-                       }
+                       
                        
                        break;
                    }
@@ -630,9 +624,30 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
        // Logger::info(v.to_string(), "VehicleData.txt");
     }
 
-    /*
-        for(auto & i : visited)
+   // std::pair<double, sf::Vertex> depotEdge = {depot.second.score, sf::Vertex(sf::Vector2f(depot.second.x, depot.second.y))};
+    if(edges.size() > 0)
+        edges.clear();
+
+    for(auto & v : vehicles)
     {
+        for(auto & p : v.path)
+        {
+            std::pair<double, sf::Vertex> newEdge;
+            newEdge.first = p.second.score;
+            newEdge.second = sf::Vertex(sf::Vector2f(p.second.x, p.second.y));
+            edges.push_back(newEdge);
+            Logger::info("(Pushed back)Edge for vehicle " + p.first + "\t" + p.second.to_string(), update);
+        }
+    }
+
+    for(auto & i : visited)
+    {
+        Logger::info("Visted: " + i.to_string(), update);
+
+    }
+
+
+    /*
     Logger::info("Visited: " + i.to_string(), update);
       for(const auto & e : alledges)
       {
@@ -670,10 +685,7 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
     
 
 
-    for(auto & i : alledges)
-    {
-        i.first *= (1-evaporationRate); 
-    }  
+
 
 
 
@@ -688,7 +700,13 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
     if (nodes.empty()) return;
 
 
-
+    for(auto & i :vehicles)
+    {
+        Logger::info("Vehicles: " + i.to_string(), "update.txt");
+        std::vector<std::pair<std::string, coord>> path = i.path;
+        
+    }
+    
     float windowWidth = window.getSize().x;
     float windowHeight = window.getSize().y;
 
@@ -725,31 +743,58 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
     window.clear();
 
     // Transform and draw edges
-    bool hasDepot = false;
+    bool started = false;
+    bool ended = false;
     std::vector<sf::Vertex>transformedEdges;
     for (size_t i = 0; i < edges.size(); ++i) {
         auto pos = edges[i].second.position;
         if(areCoordsEqual(coord(0,pos.x, pos.y), depot.second))
         {
-     //       hasDepot = !hasDepot;
+           if(!started)
+           {
+            started = true;
+           }
+           else{
+            ended = true;
+           }
+
+           
         }
 
-      //  if(hasDepot)
+        if(started && !ended)
         {
         Logger::info("hasDepot: " + coord(0,pos.x, pos.y).to_string(), "draw.txt");
         sf::Vector2f newPos(pos.x * scaleX + offset.x, pos.y * scaleY + offset.y);
         if(!(newPos.x == 0 && newPos.y == 0))
         {
-            transformedEdges.push_back( sf::Vertex(newPos, edges[i].second.color));
+            sf::Color randomColour(rand()%256, rand()%256, rand()%256);
+            transformedEdges.push_back( sf::Vertex(newPos, randomColour));
         }
+        }
+        if(ended)
+        {
+            started = false;
+            ended = false;
         }
         
     }
 
+
     if (!transformedEdges.empty())
     {
+        /*
+        0,1,2 - 2
+        3,4,5 - 2
+        6,7,8 - 2
+        9,10,11 - 2
+        */
+       //runNum + 1 
+       //runNum * numVehicles = inner nodes
+        for(int i = 0; i < (runNum * numVehicles) +(numVehicles); i+=3)
+        {
+            window.draw(&transformedEdges[i],(runNum + 1) ,sf::LineStrip);            
 
-        window.draw(&transformedEdges[0],transformedEdges.size() ,sf::Lines);            
+        }
 
         
        // window.draw(&transformedEdges[0], transformedEdges.size(), sf::Lines);
