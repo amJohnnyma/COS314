@@ -13,9 +13,9 @@ int main(int argc, char* argv[]) {    // Create the problem instance from the in
 
 
     std::vector<std::string> filenames = {
-       "p3.2.a.txt",
+        "p3.2.a.txt",
         "p3.2.c.txt",
-       "p3.3.a.txt",
+        "p3.3.a.txt",
         "p3.3.c.txt",
         "p3.4.s.txt",
         "p3.4.t.txt",
@@ -25,10 +25,10 @@ int main(int argc, char* argv[]) {    // Create the problem instance from the in
         "p7.4.g.txt",
         "p7.4.q.txt"
     };
-    int count = 0;
 
+    std::vector<allResult> aR;    
     for(const auto&f : filenames)
-    {
+    {        
         param initP = {
             0.1, //pheromones
             0.2, //pheromone imp
@@ -38,16 +38,41 @@ int main(int argc, char* argv[]) {    // Create the problem instance from the in
             seed, //seed
             30, //max it
             5,//max it no impro
-            0.01 //randomly replace a node //1% chance to replace node
+            0.05 //randomly replace all nodes //1% chance to replace node
         };
+        std::vector<seedResult> results;
+        for(int k =0;k<10;k++)
+        {
+            ProblemInstance pb(f, initP);
+            pb.solveProblem();
+            Logger::info("\n" + pb.printGraphAsTable(), "table"+f);
+            results.push_back(pb.getResult());
+        }
+        allResult a;
+        a.name = f;
+        a.results = results;
+
+        aR.push_back(a);
 
 
-        ProblemInstance pb(f, initP);
-        pb.solveProblem();
-        Logger::info("\n" + pb.printGraphAsTable(), "table"+f);
-        //pb.getResults
-        //pb.getBestResult
+
     }
+
+    int count = 0;
+    seedResult bestR;
+    bestR.duration = 0;
+    for(const auto & ar : aR)
+    {
+        for(const auto & b : ar.results)
+        {
+            if(b.duration > bestR.duration)
+            {
+                
+            }
+        }
+    }
+
+
 
     
 

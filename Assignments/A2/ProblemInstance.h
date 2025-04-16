@@ -14,6 +14,7 @@
 #include "../../Utils/Logger.h"
 #include <regex>
 #include <set>
+#include <unistd.h>  /
 
 #include <SFML/Graphics.hpp>
 
@@ -49,7 +50,10 @@ class ProblemInstance
         std::mt19937 rng;
         double getBestScore();
         double prevBestScore = 0;
-            int maxItNoImpro = 0;
+        int maxItNoImpro = 0;
+        seedResult result;
+
+
 
         
 
@@ -68,7 +72,7 @@ class ProblemInstance
         double distance(const coord& a, const coord& b);
         void addEdge(std::string u, std::string v);
         coord getNodeScore(coord n);
-
+        seedResult getResult();
         bool isVisited(const coord &c);
 
         void printGraph();

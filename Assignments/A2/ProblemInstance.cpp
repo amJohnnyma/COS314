@@ -104,13 +104,25 @@ ProblemInstance::ProblemInstance(std::string filename, param params)
     //Do seed
     if(params.seed == 0) //random seed
     {   
-        rng.seed(/*time*/);
+        auto timeSeed = std::chrono::system_clock::now().time_since_epoch().count();
+
+        // Combine with process ID to further differentiate the seeds
+        auto pidSeed = getpid();
+    
+        // Combine time and process ID to create a unique seed
+        auto seed = timeSeed ^ pidSeed;
+        rng.seed(seed);
     }
     else
     {
         rng.seed(params.seed);
     }
     
+
+    params.maxIt *= numVehicles;
+    params.maxIt *= numNodes;
+    params.maxItNoImpro *= numVehicles;
+    params.maxItNoImpro *= numNodes;
 
 }
 
@@ -395,6 +407,7 @@ void ProblemInstance::solveProblem()
     }
 
 
+    auto start = std::chrono::high_resolution_clock::now();
     int iterations = 0;
     while (window.isOpen()) {
        
@@ -408,6 +421,7 @@ void ProblemInstance::solveProblem()
             iterations ++;
         }
         else{
+            auto end = std::chrono::high_resolution_clock::now();
             sf::Texture texture;
             texture.create(window.getSize().x, window.getSize().y);
             texture.update(window);
@@ -417,6 +431,31 @@ void ProblemInstance::solveProblem()
                 imageName = imageName.substr(0, imageName.size() - 4) + ".png";
             }            
             screenshot.saveToFile(imageName);
+
+            result.seed = params.seed;
+            double bestScore = 0;
+            double bestDuration = 0;
+            std::vector<coord> bestPath;
+            for(auto & v : vehicles)
+            {
+                if(v.score > bestScore)
+                {
+                    bestScore = v.score;
+                    for(auto & p : v.path)
+                    {
+                        bestPath.push_back(p.second);
+                    }
+                    bestDuration = v.travelDistance;
+                }
+
+            }
+            result.cost = bestScore;
+            result.solution = bestPath;
+            result.duration = bestDuration;
+            result.runtime = (start - end);
+            result.iterations = runNum;
+            
+
             window.close();
         }
         
@@ -447,6 +486,11 @@ double ProblemInstance::getBestScore()
         }
     }
     return bestScore;
+}
+
+seedResult ProblemInstance::getResult()
+{
+    return result;
 }
 
 void ProblemInstance::update(std::vector<sf::CircleShape> &nCircles)
@@ -506,76 +550,87 @@ void ProblemInstance::update(std::vector<sf::CircleShape> &nCircles)
             }
             else{
           //      Logger::info("Not at depot", update);
-          double randVal = dist(rng);
-          if(randVal < params.newPathCoeff)
-          {
-            Logger::info("Node replace", update);
-           curPath.erase(std::remove(curPath.begin(), curPath.end(), cp), curPath.end());
-           visited.erase(std::remove(visited.begin(), visited.end(), cp.second), visited.end());
-
-           std::uniform_real_distribution<> dist(0.0, 1.0);
-           double randVal = dist(rng);
-           double cumulative = 0.0;
-           for(const auto& p : calculatedScore)
-           {
-               cumulative += p.second;
-               if(randVal <= cumulative)
-               {
-               //    Logger::info("Randomly chose score ", update);
-                   //select this node to use
-                   //add this node
-                   //update pheromones
-                   visited.push_back(p.first);
-                   coord added = p.first;
-                   Logger::info("Adding to visited " +added.to_string(), update);
-   
-                   v.travelDistance += distance(selected, p.first) + distance(p.first,depot.second);
-                   v.score += p.first.score;
-   
-                   std::string id = "";
-                   for (const auto& node : nodes) {
-                       if (node.second == p.first) {
-                           id = node.first;
-                           break;
-                       }
-                   }
-                   curPath.push_back({id, added});
-                   
-   
-                   //update pheromones for p.first
-                   for(int ec = 0; ec < alledges.size(); ec++)
-                   {
-                       /*
-                       Connected edges:
-                       0-1
-                       2-3
-                       4-5  
-                       */
-                      coord edgePos(alledges[ec].first);
-                      for(auto & eu : alledges[ec].second)
-                      {
-                       if(areCoordsEqual(eu.second.first,added))
-                       {
-                           eu.first = (params.Q*(eu.first)/p.second);
-                           continue;
-                       }
-                       eu.first *= (1-params.evaporationRate);
-   
-                      }   
-   
-                      
-                     
-                   }                
-                   changes = true;
-                   curPath.push_back(depot);
-                   v.path = curPath;
-                   break;
-               }
-               
-           }
-           break;
-          }
-            }
+        double randVal = dist(rng);
+        if(randVal < params.newPathCoeff)
+        {
+        Logger::info("Node replace", update);
+        
+        
+        for(auto & c : curPath)
+        {
+            visited.erase(std::remove(visited.begin(), visited.end(), c.second), visited.end());
+        }
+        if (curPath.size() > 1) {curPath.erase(curPath.begin() + 1, curPath.end());}
+            
+        
+        v.score = 0;
+            for(int i = 0; i < runNum; i ++)
+            {
+                std::uniform_real_distribution<> dist(0.0, 1.0);
+                double randVal = dist(rng);
+                double cumulative = 0.0;
+                for(const auto& p : calculatedScore)
+                {
+                    cumulative += p.second;
+                    if(randVal <= cumulative)
+                    {
+                    //    Logger::info("Randomly chose score ", update);
+                        //select this node to use
+                        //add this node
+                        //update pheromones
+                        visited.push_back(p.first);
+                        coord added = p.first;
+                        Logger::info("Adding to visited " +added.to_string(), update);
+        
+                        v.travelDistance += distance(selected, p.first) + distance(p.first,depot.second);
+                        v.score += p.first.score;
+        
+                        std::string id = "";
+                        for (const auto& node : nodes) {
+                            if (node.second == p.first) {
+                                id = node.first;
+                                break;
+                            }
+                        }
+                        curPath.push_back({id, added});
+                        
+        
+                        //update pheromones for p.first
+                        for(int ec = 0; ec < alledges.size(); ec++)
+                        {
+                            /*
+                            Connected edges:
+                            0-1
+                            2-3
+                            4-5  
+                            */
+                            coord edgePos(alledges[ec].first);
+                            for(auto & eu : alledges[ec].second)
+                            {
+                            if(areCoordsEqual(eu.second.first,added))
+                            {
+                                eu.first = (params.Q*(eu.first)/p.second);
+                                continue;
+                            }
+                            eu.first *= (1-params.evaporationRate);
+        
+                            }   
+        
+                            
+                            
+                        }                
+                        changes = true;
+                        //curPath.push_back(depot);
+                        v.path = curPath;
+                        break;
+                    }
+                    }
+            
+            
+        }
+            continue;
+        }
+        }
             selected = cp.second;
         //    Logger::info("Selected " + selected.to_string() , update);
             //now go through nodes and calculate scores

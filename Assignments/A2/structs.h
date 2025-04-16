@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_set>
+#include <chrono>
 
 struct coord
 {
@@ -87,9 +88,10 @@ struct seedResult
     std::vector<coord> solution; //depot -> nodes -> depot
     double cost; //Distance travelled by seeds
     double duration;
-    double runtime; //Total time to run
+    std::chrono::duration<double> runtime; //Total time to run
+    int iterations;
 };
-struct instanceResult
+struct allResult
 {
     std::string name; //instance name
     std::vector<seedResult> results; //will need to string
