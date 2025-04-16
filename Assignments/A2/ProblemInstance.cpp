@@ -2,7 +2,7 @@
 
 
 
-ProblemInstance::ProblemInstance(std::string filename)
+ProblemInstance::ProblemInstance(std::string filename, param params)
 {
     Logger::info("Constructing problem instance: " + filename,debugfile);
 
@@ -14,7 +14,8 @@ ProblemInstance::ProblemInstance(std::string filename)
 
         return;
     }
-
+    imageName = filename;
+    this->params = params;
     std::string line;
     bool first = true;
 
@@ -100,6 +101,17 @@ ProblemInstance::ProblemInstance(std::string filename)
         }
     }
 
+    //Do seed
+    if(params.seed == 0) //random seed
+    {   
+        rng.seed(/*time*/);
+    }
+    else
+    {
+        rng.seed(params.seed);
+    }
+    
+
 }
 
 ProblemInstance::~ProblemInstance()
@@ -132,7 +144,7 @@ void ProblemInstance::addEdge(std::string u, std::string v)
     double dist = distance(node_coord_section[u], node_coord_section[v]);
     adjList[u].push_back({v, dist});
     adjList[v].push_back({u, dist});
-    Logger::info("Added edge: " + u + "->" + v + ": " + std::to_string(dist),debugfile);
+   // Logger::info("Added edge: " + u + "->" + v + ": " + std::to_string(dist),debugfile);
 }
 
 void ProblemInstance::printGraph()
@@ -265,7 +277,7 @@ coord ProblemInstance::getNodeScore(coord n)
         if(areCoordsEqual(n,entry.second))
         {
         coord c = entry.second;
-        Logger::info("Pushed back: " + c.to_string(), "erh.txt");
+      //  Logger::info("Pushed back: " + c.to_string(), "erh.txt");
          return c;
         }
     }
@@ -279,11 +291,17 @@ bool ProblemInstance::isVisited(const coord& c) {
 }
 double ProblemInstance::pheromoneCalc(double Tij, double Nij,std::vector<std::pair<std::pair<coord,double>, double>> scores)
 {
-    double top = std::pow(Tij, pheromoneImportance) * std::pow(Nij, heuristicImportance);
+    double top = std::pow(Nij, params.pheromoneImportance) * std::pow(Tij, params.heuristicImportance);
     double bottom = 0.0;
-    for(const auto & i : scores)
+    for(auto & i : scores)
     {
-        bottom += (std::pow(i.first.second, heuristicImportance) * std::pow(i.second, pheromoneImportance));
+      //  Logger::info("i.first.second: " + std::to_string(i.first.second), "wfge.txt");
+        if(std::isnan(i.first.second))
+        {
+            i.first.second = i.second;
+        }
+       // Logger::info("i.second: " + std::to_string(i.second), "wfge.txt");
+        bottom += (std::pow(i.first.second, params.heuristicImportance) * std::pow(i.second, params.pheromoneImportance));
     }
 
     return top / bottom;
@@ -322,6 +340,8 @@ void ProblemInstance::solveProblem()
         v.score = 0;
         vehicles.push_back(v);
     }
+
+
 
     std::map<std::string, coord> nodeCoordMap;
     std::set<std::pair<std::string, std::string>> drawn;
@@ -362,7 +382,7 @@ void ProblemInstance::solveProblem()
         {
            // std::vector<std::pair<double, std::pair<coord, sf::Vertex>>> connEdges;
             coord nCoord = nodeCoordMap[nid];
-            std::pair<double, std::pair<coord, sf::Vertex>> newEdge = {pheromones, {nCoord, sf::Vertex(sf::Vector2f(nCoord.x, nCoord.y), sf::Color::Red)}};
+            std::pair<double, std::pair<coord, sf::Vertex>> newEdge = {params.pheromones, {nCoord, sf::Vertex(sf::Vector2f(nCoord.x, nCoord.y), sf::Color::Red)}};
             connEdges.push_back(newEdge);
         }
         newEdges.first = fromCoord;
@@ -374,47 +394,32 @@ void ProblemInstance::solveProblem()
 
     }
 
-    /*
-            for(auto i : alledges)
-        {
-            Logger::info(i.first.to_string() + " Conns: ", "conconcon.txt");
-            for(auto j : i.second)
-            {
-                Logger::info(j.second.first.to_string(), "conconcon.txt");
 
-            }
-        }
-    */
-
-
-        
-
-/*
-    update(nCircles); 
-    render(window, nCircles); 
-    
-    sf::sleep(sf::seconds(2));
-   //  window.close();
-    update(nCircles); 
-    render(window, nCircles); 
-    sf::sleep(sf::seconds(2));
-  //  update(nCircles); 
-  //  render(window, nCircles); 
-*/
-
+    int iterations = 0;
     while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                window.close();
-            }
-    
-            if (event.type == sf::Event::MouseButtonPressed || event.type == sf::Event::KeyPressed) {
-                update(nCircles);
-                render(window, nCircles);
-                sf::sleep(sf::milliseconds(100));
-            }
-        }         
+       
+       handleEvents(window);
+       
+        if(params.maxIt > iterations && (maxItNoImpro) < params.maxItNoImpro) 
+        {
+            update(nCircles);
+            render(window, nCircles);
+          //  sf::sleep(sf::milliseconds(1000));
+            iterations ++;
+        }
+        else{
+            sf::Texture texture;
+            texture.create(window.getSize().x, window.getSize().y);
+            texture.update(window);
+
+            sf::Image screenshot = texture.copyToImage();
+            if (imageName.size() >= 4 && imageName.substr(imageName.size() - 4) == ".txt") {
+                imageName = imageName.substr(0, imageName.size() - 4) + ".png";
+            }            
+            screenshot.saveToFile(imageName);
+            window.close();
+        }
+        
         
     }
 }
@@ -431,10 +436,29 @@ void ProblemInstance::handleEvents(sf::RenderWindow& window)
 
 }
 
-void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
+double ProblemInstance::getBestScore()
+{
+    double bestScore = 0;
+    for(auto & v : vehicles)
+    {
+        if(v.score > bestScore)
+        {
+            bestScore = v.score;
+        }
+    }
+    return bestScore;
+}
+
+void ProblemInstance::update(std::vector<sf::CircleShape> &nCircles)
 {   
+    // Define RNG
+    std::mt19937 rng(params.seed); // seed is an int
+
+    // Example usage
+    std::uniform_real_distribution<> dist(0.0, 1.0);
+    double r = dist(rng); // random number between 0 and 1
     std::string update = "update.txt";
-    Logger::info("Updating...", update);
+  //  Logger::info("Updating...", update);
     std::vector<std::pair<std::string, coord>> nodes;    
    // edges = {};
     //rather retrieve "best solution" and edit that instead of nodes
@@ -459,7 +483,7 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
         //check edge vertexes to get pheromone value of a node
         auto cp = curPath.back();
         {
-            Logger::info("Checking current path: " + cp.second.to_string(), update);
+        //    Logger::info("Checking current path: " + cp.second.to_string(), update);
             //if we are at the depot check if we are starting or ending
             if(cp.second == depot.second)
             {
@@ -467,24 +491,93 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                 {
                     continue;
                 }
-                Logger::info("At a depot", update);
+             //   Logger::info("At a depot", update);
                 if(atDepot)
                 {
-                    Logger::info("First depot", update);
+             //       Logger::info("First depot", update);
                     atDepot = false; //Going to move away from depot
 
                 }
                 else{
                     //We have finished the path checking
-                    Logger::info("Second depot", update);
+              //      Logger::info("Second depot", update);
                     break;
                 }
             }
             else{
-                Logger::info("Not at depot", update);
+          //      Logger::info("Not at depot", update);
+          double randVal = dist(rng);
+          if(randVal < params.newPathCoeff)
+          {
+            Logger::info("Node replace", update);
+           curPath.erase(std::remove(curPath.begin(), curPath.end(), cp), curPath.end());
+           visited.erase(std::remove(visited.begin(), visited.end(), cp.second), visited.end());
+
+           std::uniform_real_distribution<> dist(0.0, 1.0);
+           double randVal = dist(rng);
+           double cumulative = 0.0;
+           for(const auto& p : calculatedScore)
+           {
+               cumulative += p.second;
+               if(randVal <= cumulative)
+               {
+               //    Logger::info("Randomly chose score ", update);
+                   //select this node to use
+                   //add this node
+                   //update pheromones
+                   visited.push_back(p.first);
+                   coord added = p.first;
+                   Logger::info("Adding to visited " +added.to_string(), update);
+   
+                   v.travelDistance += distance(selected, p.first) + distance(p.first,depot.second);
+                   v.score += p.first.score;
+   
+                   std::string id = "";
+                   for (const auto& node : nodes) {
+                       if (node.second == p.first) {
+                           id = node.first;
+                           break;
+                       }
+                   }
+                   curPath.push_back({id, added});
+                   
+   
+                   //update pheromones for p.first
+                   for(int ec = 0; ec < alledges.size(); ec++)
+                   {
+                       /*
+                       Connected edges:
+                       0-1
+                       2-3
+                       4-5  
+                       */
+                      coord edgePos(alledges[ec].first);
+                      for(auto & eu : alledges[ec].second)
+                      {
+                       if(areCoordsEqual(eu.second.first,added))
+                       {
+                           eu.first = (params.Q*(eu.first)/p.second);
+                           continue;
+                       }
+                       eu.first *= (1-params.evaporationRate);
+   
+                      }   
+   
+                      
+                     
+                   }                
+                   changes = true;
+                   curPath.push_back(depot);
+                   v.path = curPath;
+                   break;
+               }
+               
+           }
+           break;
+          }
             }
             selected = cp.second;
-            Logger::info("Selected " + selected.to_string() , update);
+        //    Logger::info("Selected " + selected.to_string() , update);
             //now go through nodes and calculate scores
             //Start at cp (current node)
             //compare to the edges
@@ -502,22 +595,22 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
 
                 coord edgePos(alledges[ec].first);
                 coord destinationEdge;
-               Logger::info("edgepos: " + edgePos.to_string(), update);
+            //   Logger::info("edgepos: " + edgePos.to_string(), update);
 
                 if(areCoordsEqual(edgePos, selected))
                 {
-                    Logger::info("Matching edge for " + selected.to_string(), update);
+                //    Logger::info("Matching edge for " + selected.to_string(), update);
 
                     for(auto & destEdge : alledges[ec].second)
                     {
                         destinationEdge = destEdge.second.first;
                         if(areCoordsEqual(destinationEdge, depot.second) && atDepot)
                         {
-                            Logger::info("At last depot", update);
+                   //         Logger::info("At last depot", update);
                             continue;
                         }
                         else{
-                            Logger::info("At first depot finding edges", update);
+                    //        Logger::info("At first depot finding edges", update);
                         }
                         //We are connected to this edge from cp so calculate heuristic
                         //We can still travel here
@@ -526,11 +619,21 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                         // total distance travelled + distance to node + distance to depot from next node <= tmax
                         if((v.travelDistance + distance(destinationEdge,cp.second) + distance(destinationEdge, depot.second)) <=tmax && !isVisited(destinationEdge))
                         {
-                        //  Logger::info("Can travel to edge ", update);
+                       //   Logger::info("Can travel to edge ", update);
 
                             //find the nodes score
+                            double dist = distance(destinationEdge, cp.second);
+                            if(dist == 0 || std::isnan(dist))
+                            {
+                                dist = distance(cp.second, depot.second);
+                            }
+                            double bot = (destinationEdge.score / dist);
+                            if(bot==0)
+                            {
+                                bot = 1;
+                            }
                             std::pair<std::pair<coord,double>, double> thisScore = {
-                                {destinationEdge, destinationEdge.score / distance(destinationEdge, cp.second)},
+                                {destinationEdge, bot},
                                     destEdge.first                            
                             };
                             scores.push_back(thisScore);
@@ -560,19 +663,42 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
         {
             std::pair<coord, double> Pij;
             Pij.first = i.first.first;
-            Pij.second = pheromoneCalc(i.second, i.first.second, scores);
+            Pij.second = pheromoneCalc(i.second, i.first.second, scores);            
             calculatedScore.push_back(Pij);
-            Logger::info("Pheromone scores: " + Pij.first.to_string() + "\t" + std::to_string(Pij.second), update);
+            Logger::info("Raw Pheromone scores: " + Pij.first.to_string() + "\t" + std::to_string(Pij.second), update);
         }
 
-        double randVal = ((double) rand() / RAND_MAX);
+            // 2. Normalize
+        double totalScore = 0.0;
+        for (const auto& p : calculatedScore) {
+            totalScore += p.second;
+        }
+
+        // Safety check to avoid division by zero or NaN
+        if (totalScore == 0.0 || std::isnan(totalScore)) {
+            Logger::error("Total pheromone score is zero or NaN — check pheromoneCalc output", update);
+            //  assign uniform probability if broken score
+            double uniform = 1.0 / calculatedScore.size();
+            for (auto& p : calculatedScore) {
+                p.second = uniform;
+            }
+        } else {
+            for (auto& p : calculatedScore) {
+                p.second /= totalScore;
+            }
+        }
+
+        v.scores = calculatedScore;
+
+        std::uniform_real_distribution<> dist(0.0, 1.0);
+        double randVal = dist(rng);
         double cumulative = 0.0;
         for(const auto& p : calculatedScore)
         {
             cumulative += p.second;
             if(randVal <= cumulative)
             {
-                Logger::info("Randomly chose score ", update);
+            //    Logger::info("Randomly chose score ", update);
                 //select this node to use
                 //add this node
                 //update pheromones
@@ -581,7 +707,7 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                 Logger::info("Adding to visited " +added.to_string(), update);
 
                 v.travelDistance += distance(selected, p.first) + distance(p.first,depot.second);
-                v.score += p.second;
+                v.score += p.first.score;
 
                 std::string id = "";
                 for (const auto& node : nodes) {
@@ -607,10 +733,10 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
                    {
                     if(areCoordsEqual(eu.second.first,added))
                     {
-                        eu.first += (Q/p.second);
+                        eu.first = (params.Q*(eu.first)/p.second);
                         continue;
                     }
-                    eu.first *= (1-evaporationRate);
+                    eu.first *= (1-params.evaporationRate);
 
                    }   
 
@@ -640,9 +766,12 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
             newEdge.first = p.second.score;
             newEdge.second = sf::Vertex(sf::Vector2f(p.second.x, p.second.y));
             edges.push_back(newEdge);
-            Logger::info("(Pushed back)Edge for vehicle " + p.first + "\t" + p.second.to_string(), update);
+         //   Logger::info("(Pushed back)Edge for vehicle " + p.first + "\t" + p.second.to_string(), update);
         }
+        Logger::info("Vehicles after it: " + v.to_string(), update);
     }
+
+    /*
 
     for(auto & i : visited)
     {
@@ -658,12 +787,24 @@ void ProblemInstance::update(std::vector<sf::CircleShape>& nCircles)
         Logger::info("Edges added: " + ec.to_string(), "edges.txt");
 
     }
+    */
     
 
 
 
 
+    double bs = getBestScore();
+  //  Logger::info("BestScore: " + std::to_string(bs) + "\\tPrev: " + std::to_string(prevBestScore), "Iterationtrack.txt");
 
+    if(bs <= prevBestScore)
+    {
+        maxItNoImpro++;
+    }
+    else{
+        maxItNoImpro = 0;
+        prevBestScore = bs;
+    }
+ //   Logger::info("MaxItNoImpro: " + std::to_string(params.maxItNoImpro) + "\tCount: " + std::to_string(maxItNoImpro) + "\tIt: " + std::to_string(runNum), "Iterationtrack.txt");
 
     
 
@@ -675,6 +816,7 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
 
     if (nodes.empty()) return;
 
+/*
 
     for(auto & i :vehicles)
     {
@@ -691,6 +833,7 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
             Logger::info("Pheromones: " + std::to_string(j.first), "P.txt");
         }
     }
+*/
     
     float windowWidth = window.getSize().x;
     float windowHeight = window.getSize().y;
@@ -733,6 +876,8 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
     std::vector<sf::Vertex>transformedEdges;
     std::vector<int> size;
     int count = 0;
+    std::uniform_int_distribution<int> dist(0,255);
+    sf::Color randomColour;
     for (size_t i = 0; i < edges.size(); ++i) {
         
         auto pos = edges[i].second.position;
@@ -741,7 +886,8 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
            if(!started)
            {
             count = 0;
-            started = true;
+            started = true;           
+            randomColour = sf::Color(dist(rng), dist(rng), dist(rng));
            }
            else{
             ended = true;
@@ -752,11 +898,11 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
 
         if(started && !ended)
         {
-        Logger::info("hasDepot: " + coord(0,pos.x, pos.y).to_string(), "draw.txt");
+    //    Logger::info("hasDepot: " + coord(0,pos.x, pos.y).to_string(), "draw.txt");
         sf::Vector2f newPos(pos.x * scaleX + offset.x, pos.y * scaleY + offset.y);
         if(!(newPos.x == 0 && newPos.y == 0))
-        {
-            sf::Color randomColour(rand()%256, rand()%256, rand()%256);
+        {           
+
             transformedEdges.push_back( sf::Vertex(newPos, randomColour));
             count++;
         }
@@ -780,13 +926,19 @@ void ProblemInstance::render(sf::RenderWindow& window, const std::vector<sf::Cir
         9,10,11 - 2
         */
        //runNum + 1 
-       //runNum * numVehicles = inner nodes
-       
-        for(int i = 0; i < transformedEdges.size(); i+=3)
-        {
-            window.draw(&transformedEdges[i], size[i/3] ,sf::LineStrip);            
+       //runNum * numVehicles = inner nodes      
 
-        }
+       int startIndex = 0;
+       for (size_t i = 0; i < size.size(); ++i) {
+           int count = size[i];
+           if (startIndex + count <= transformedEdges.size()) {
+               window.draw(&transformedEdges[startIndex], count, sf::LineStrip);
+           } else {
+               Logger::warning("Invalid edge size for vehicle " + std::to_string(i));
+           }
+           startIndex += count;
+       }
+
 
         
        // window.draw(&transformedEdges[0], transformedEdges.size(), sf::Lines);
@@ -854,7 +1006,7 @@ std::vector<std::pair<std::string ,coord>> ProblemInstance::getNodeCoordSection(
         {
             coords.push_back(entry);  
             coord c = entry.second;
-            Logger::info("Pushed back: " + c.to_string(), "nodecoord.txt");
+        //    Logger::info("Pushed back: " + c.to_string(), "nodecoord.txt");
         }
 
     }

@@ -54,6 +54,7 @@ struct vehicle
     //path -> node ID, node coord
     std::vector<std::pair<std::string, coord>> path;
     double travelDistance;
+    std::vector<std::pair<coord,double>> scores;
 
     std::string to_string()
     {
@@ -66,6 +67,40 @@ struct vehicle
         return "Tmax:" + std::to_string(tmax) + " Score:" + std::to_string(score) + " travelDistance:" + std::to_string(travelDistance) + p;
     }
 };
+
+struct param
+{
+    double pheromones;
+    double pheromoneImportance;
+    double heuristicImportance;
+    double evaporationRate;
+    double Q;
+    int seed;
+    int maxIt;
+    int maxItNoImpro;
+    double newPathCoeff;
+};
+
+struct seedResult
+{
+    int seed; //
+    std::vector<coord> solution; //depot -> nodes -> depot
+    double cost; //Distance travelled by seeds
+    double duration;
+    double runtime; //Total time to run
+};
+struct instanceResult
+{
+    std::string name; //instance name
+    std::vector<seedResult> results; //will need to string
+
+     
+    //Total cost
+    //total duration
+    //total runtime
+
+};
+
 
 
 #endif
