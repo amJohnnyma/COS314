@@ -101,28 +101,16 @@ ProblemInstance::ProblemInstance(std::string filename, param params)
         }
     }
 
-    //Do seed
-    if(params.seed == 0) //random seed
-    {   
-        auto timeSeed = std::chrono::system_clock::now().time_since_epoch().count();
 
-        // Combine with process ID to further differentiate the seeds
-        auto pidSeed = getpid();
-    
-        // Combine time and process ID to create a unique seed
-        auto seed = timeSeed ^ pidSeed;
-        rng.seed(seed);
-    }
-    else
-    {
-        rng.seed(params.seed);
-    }
-    
+    this->params.maxIt *= numVehicles;
+    this->params.maxIt *= numNodes;
+    this->params.maxItNoImpro *= numVehicles;
+    this->params.maxItNoImpro *= numNodes;
 
-    params.maxIt *= numVehicles;
-    params.maxIt *= numNodes;
-    params.maxItNoImpro *= numVehicles;
-    params.maxItNoImpro *= numNodes;
+    rng.seed(params.seed);
+
+
+
 
 }
 
@@ -337,7 +325,7 @@ bool edgeExists(
 
 void ProblemInstance::solveProblem()
 {
-    sf::RenderWindow window(sf::VideoMode(1200, 900), "ACO Visualizer");
+
 
     std::vector<std::pair<std::string, coord>> nodes = getNodeCoordSection();    //start with all nodes and edges available
 
@@ -409,6 +397,47 @@ void ProblemInstance::solveProblem()
 
     auto start = std::chrono::high_resolution_clock::now();
     int iterations = 0;
+    //no render   
+       
+     while(params.maxIt > iterations && (maxItNoImpro) < params.maxItNoImpro)
+         {
+             update(nCircles);
+           //  sf::sleep(sf::milliseconds(1000));
+             iterations ++;
+         }
+
+             auto end = std::chrono::high_resolution_clock::now();
+                        
+ 
+             result.seed = params.seed;
+             double bestScore = 0;
+             double bestDuration = 0;
+             std::vector<coord> bestPath;
+             for(auto & v : vehicles)
+             {
+                 if(v.score > bestScore)
+                 {
+                     bestScore = v.score;
+                     bestPath.clear();
+                     for(auto & p : v.path)
+                     {
+                        
+                         bestPath.push_back(p.second);
+                     }
+                     bestDuration = v.travelDistance;
+                 }
+ 
+             }
+             result.cost = bestScore;
+             result.solution = bestPath;
+             result.duration = bestDuration;
+             result.runtime = (start - end);
+             result.iterations = runNum;         
+          }
+    //render
+    /*
+    sf::RenderWindow window(sf::VideoMode(1200, 900), "ACO Visualizer");
+
     while (window.isOpen()) {
        
        handleEvents(window);
@@ -461,19 +490,10 @@ void ProblemInstance::solveProblem()
         
         
     }
-}
-
-void ProblemInstance::handleEvents(sf::RenderWindow& window)
-{    
-    sf::Event event;
-    while (window.pollEvent(event))
-        if (event.type == sf::Event::Closed)
-        {
-            window.close();
-        }
+    */
+    
 
 
-}
 
 double ProblemInstance::getBestScore()
 {
@@ -490,6 +510,7 @@ double ProblemInstance::getBestScore()
 
 seedResult ProblemInstance::getResult()
 {
+
     return result;
 }
 

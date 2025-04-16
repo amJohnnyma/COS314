@@ -30,6 +30,11 @@ public:
     static void error(const T& message, const std::string& filename = "log.txt") {
         log("ERROR", message, filename);
     }
+    template<typename T>
+    static void naked(const T& message, const std::string& filename = "log.txt")
+    {
+        nlog("", message, filename);
+    }
 
 private:
     // Common log function that writes messages to a file
@@ -53,6 +58,23 @@ private:
         if (logFile.is_open()) {
             // Write the timestamp, log level, and the message to the file
             logFile << "[" << timestamp.str() << "] [" << level << "] " << message << std::endl;
+            logFile.close();
+        } else {
+            std::cerr << "Unable to open log file!" << std::endl;
+        }
+    }
+    template<typename T>
+    static void nlog(const std::string& level, const T& message, const std::string& filename) {
+
+        // Ensure the logs directory exists
+        fs::create_directories("Utils/logs");
+
+        // Open the log file in append mode
+        std::ofstream logFile("Utils/logs/" + filename, std::ios::app);
+
+        if (logFile.is_open()) {
+            // Write the timestamp, log level, and the message to the file
+            logFile << message << std::endl;
             logFile.close();
         } else {
             std::cerr << "Unable to open log file!" << std::endl;

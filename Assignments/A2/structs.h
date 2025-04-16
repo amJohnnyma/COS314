@@ -26,6 +26,11 @@ struct coord
         return "Score: " + std::to_string(score) + '\t' + std::to_string(x) + ", " + std::to_string(y);
     }
 
+    std::string coord_only_to_string()
+    {
+        return "("+std::to_string(x) + ", " + std::to_string(y) + ")";
+    }
+
 
 };
 
@@ -76,20 +81,35 @@ struct param
     double heuristicImportance;
     double evaporationRate;
     double Q;
-    int seed;
+    unsigned int seed;
     int maxIt;
     int maxItNoImpro;
     double newPathCoeff;
+
+    std::string to_string()
+    {
+        return "alpha: " + std::to_string(pheromoneImportance) + "\tbeta: " + std::to_string(heuristicImportance) + "\tevap: " + std::to_string(evaporationRate) + "\tQ: "+ std::to_string(Q);
+    }
 };
 
 struct seedResult
 {
-    int seed; //
+    unsigned int seed; //
     std::vector<coord> solution; //depot -> nodes -> depot
     double cost; //Distance travelled by seeds
     double duration;
     std::chrono::duration<double> runtime; //Total time to run
     int iterations;
+
+    std::string to_string()
+    {
+        std::string sol = "";
+        for(auto &s : solution)
+        {
+            sol += s.coord_only_to_string() + "->";
+        }
+        return sol;
+    }
 };
 struct allResult
 {
@@ -102,6 +122,13 @@ struct allResult
     //total runtime
 
 };
+
+struct TuneResult {
+    param p;
+    double score; 
+    std::chrono::duration<double> runtime;
+};
+
 
 
 
