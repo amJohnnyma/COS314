@@ -1,21 +1,20 @@
 # Compiler and flags
 CXX = g++
 CXXFLAGS = -g -Wall -Wextra -std=c++17 -O2
-LDFLAGS =
-TARGET_BASE = A1
+LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
 
 # Detect OS
 OS := $(shell uname -s)
 
 ifeq ($(OS), Linux)
-    TARGET := $(TARGET_BASE)-linux
-    CXXFLAGS += -static
-else ifeq ($(OS), Darwin)  # macOS
-    TARGET := $(TARGET_BASE)-mac
+    EXT = linux
+    #CXXFLAGS += -static
+else ifeq ($(OS), Darwin)
+    EXT = mac
     CXXFLAGS += -stdlib=libc++
-else ifeq ($(OS), Windows_NT)  # Windows
+else ifeq ($(OS), Windows_NT)
     CXX := x86_64-w64-mingw32-g++
-    TARGET := $(TARGET_BASE).exe
+    EXT = exe
     CXXFLAGS += -static -D_WINDOWS
     LDFLAGS += -static-libgcc -static-libstdc++
 endif
@@ -26,18 +25,27 @@ UTILS_DIR = Utils
 
 # Default rule
 all:
-	@echo "Specify an assignment, e.g., make A1-linux, A1-windows, A1-mac"
+	@echo "Specify an assignment, e.g., make A1-linux, A1-windows, A2-mac"
 
-# Build rule for any assignment
-A1: $(SRC_DIR)/A1/main.o $(SRC_DIR)/A1/SA.o $(SRC_DIR)/A1/TS.o $(SRC_DIR)/A1/ProblemInstance.o
-	@echo "Compiling and linking $@..."
-	$(CXX) $(CXXFLAGS) $^ -o $(TARGET) $(LDFLAGS)
+# Generic build rule
+define BUILD_TEMPLATE
+$1: $$(OBJS_$1)
+	@echo "Compiling and linking $$@..."
+	$$(CXX) $$(CXXFLAGS) $$^ -o $1-$(EXT) $$(LDFLAGS)
+endef
 
-# Compile main files
+# Object files for A1 and A2
+OBJS_A1 = $(SRC_DIR)/A1/main.o $(SRC_DIR)/A1/SA.o $(SRC_DIR)/A1/TS.o $(SRC_DIR)/A1/ProblemInstance.o
+OBJS_A2 = $(SRC_DIR)/A2/main.o $(SRC_DIR)/A2/ProblemInstance.o
+
+# Generate build rules
+$(eval $(call BUILD_TEMPLATE,A1))
+$(eval $(call BUILD_TEMPLATE,A2))
+
+# Compilation rules for A1
 $(SRC_DIR)/A1/main.o: $(SRC_DIR)/A1/main.cpp $(SRC_DIR)/A1/*.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Compile SA and TS, ensuring Logger.h is included
 $(SRC_DIR)/A1/SA.o: $(SRC_DIR)/A1/SA.cpp $(SRC_DIR)/A1/SA.h $(UTILS_DIR)/Logger.h
 	@echo "Compiling SA..."
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -50,22 +58,43 @@ $(SRC_DIR)/A1/ProblemInstance.o: $(SRC_DIR)/A1/ProblemInstance.cpp $(SRC_DIR)/A1
 	@echo "Compiling ProblemInstance..."
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+# Compilation rules for A2
+$(SRC_DIR)/A2/main.o: $(SRC_DIR)/A2/main.cpp $(SRC_DIR)/A2/*.h
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(SRC_DIR)/A2/ProblemInstance.o: $(SRC_DIR)/A2/ProblemInstance.cpp $(SRC_DIR)/A2/ProblemInstance.h $(UTILS_DIR)/Logger.h
+	@echo "Compiling ProblemInstance..."
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 # Clean rule
 clean:
 	@echo "Cleaning build files..."
-	rm -f $(SRC_DIR)/*/*.o $(SRC_DIR)/*/*~ $(TARGET) $(TARGET).exe
+	rm -f $(SRC_DIR)/*/*.o $(SRC_DIR)/*/*~ A1-linux A1-mac A1.exe A2-linux A2-mac A2.exe
 
-# Run the program
-run: A1
-	@echo "Running $(TARGET)..."
-	./$(TARGET) $(ARGS)
+# Run targets
+runA1: A1-$(EXT)
+	@echo "Running A1-$(EXT)..."
+	./A1-$(EXT)
+
+runA2: A2-$(EXT)
+	@echo "Running A2-$(EXT)..."
+	./A2-$(EXT)
 
 # Platform-specific builds
 A1-linux:
-	$(MAKE) A1 TARGET=$(TARGET_BASE)-linux CXXFLAGS="$(CXXFLAGS) -static"
+	$(MAKE) EXT=linux A1
 
 A1-mac:
-	$(MAKE) A1 TARGET=$(TARGET_BASE)-mac CXXFLAGS="$(CXXFLAGS) -stdlib=libc++"
+	$(MAKE) EXT=mac A1
 
 A1-windows:
-	$(MAKE) A1 TARGET=$(TARGET_BASE).exe CXX=x86_64-w64-mingw32-g++ CXXFLAGS="$(CXXFLAGS) -D_WINDOWS"
+	$(MAKE) EXT=exe A1 CXX=x86_64-w64-mingw32-g++
+
+A2-linux:
+	$(MAKE) EXT=linux A2
+
+A2-mac:
+	$(MAKE) EXT=mac A2
+
+A2-windows:
+	$(MAKE) EXT=exe A2 CXX=x86_64-w64-mingw32-g++
