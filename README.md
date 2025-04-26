@@ -15,8 +15,8 @@
 
 #### 🔹 **Github Codespace (Recommended)**
 ```sh
-make A1-linux
-./A1-linux
+make A1-linux (or A2, A3 etc.)
+make runA1
 ```
 
 ### 1 Clone the Repository
@@ -48,11 +48,11 @@ make A1-windows
 
 ---
 
-## ▶ Running the Program
+## Running the Program
 
 ### **On Linux**
 ```sh
-./A1-linux
+make runA1
 ```
 
 ### **On macOS**
@@ -71,8 +71,9 @@ Alternatively, run the respective executable file directly.
 
 ---
 
-## ⚙ Usage Instructions
+## Usage Instructions
 
+### **A1**
 ### **Running from Terminal**
 1. **Navigate to the project directory**
 2. Run the appropriate executable for your OS:
@@ -90,6 +91,20 @@ Alternatively, run the respective executable file directly.
    Utils/logs/runData.txt
    ```
 
+### **A2**
+### **Running from Terminal**
+1. **Navigate to the project directory**
+2. Run the appropriate executable for your OS:
+   ```sh
+   ./A2-linux  # For Linux
+   ./A2-mac    # For macOS
+   A2-windows  # For Windows
+   ```
+
+3. **Check the results** in:
+   ```sh
+   Utils/logs/results.txt
+   ```
 ---
 
 ## Output Location
@@ -98,7 +113,7 @@ Alternatively, run the respective executable file directly.
 
 ---
 
-### **Now You're Ready to Run the TSP Algorithm! **
+### **Now You're Ready to Run the assignments algorithms Algorithms! **
 
 For any issues, feel free to check the repository or raise an issue. 
 
