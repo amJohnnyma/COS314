@@ -1,4 +1,4 @@
-# COS314 - TSP Algorithm Comparison
+# COS314 - Algorithm Comparison
 
 ## Git Repository
 [GitHub Repository](https://github.com/amJohnnyma/COS314)
@@ -7,7 +7,7 @@
 
 ## Reports
 - [A1](https://github.com/amJohnnyma/COS314/blob/main/COS314A1.pdf) (Please download for best experience)
-- [A2]() (Please download for best experience)
+- [A2](https://github.com/amJohnnyma/COS314/blob/main/COS314A2.pdf) (Please download for best experience)
 
 ---
 
