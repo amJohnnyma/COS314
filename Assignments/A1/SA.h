@@ -1,7 +1,7 @@
 #ifndef SA_H
 #define SA_H
 
-#include "../../Utils/structs.h"
+#include "structs.h"
 #include "../../Utils/Logger.h"
 #include "ProblemInstance.h"
 #include "iostream"

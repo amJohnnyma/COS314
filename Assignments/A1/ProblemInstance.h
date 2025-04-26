@@ -10,7 +10,7 @@
 #include <random>
 #include <algorithm>
 #include <map>
-#include "../../Utils/structs.h"
+#include "structs.h"
 #include "../../Utils/Logger.h"
 
 class ProblemInstance
